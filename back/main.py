@@ -80,7 +80,6 @@ def loadChat(): # This must be triggered in the front, the user must open the ch
 
 @app.post("/chat")
 def getResponse(request : Request):
-    print(request)
     chatai.createMessage(request.message, request.threadid)
     response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
     return response

@@ -47,14 +47,15 @@ class chatAI:
             Reitero la importancia que es usar la información dispuesta en este mensaje y no inventarla.\n
         '''
 
-        if not (items["Extra"] == "" or items["Extra"].isspace()):
+        if not (items["Rutas"] == "" or items["Rutas"].isspace()):
             self.prompt += f'''
+                # RUTAS #
                 Esta seccion está dedicada principalmente a brindar información sobre la página web para poder guiar al usuario en la navegación dentro de la página. A continuación, se muestran todas las
                 rutas de la página web en formato:
                 - nombre:ruta (descripción)
                 Un ejemplo de esto es (- Precios:/productos/precios (esta ruta contiene información sobre los precios de los productos))
                 Lista de rutas (en caso de que este vacío, ignorar):
-                {{}}\n
+                {items["Rutas"]}\n
             '''
 
         self.prompt += '''
