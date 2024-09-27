@@ -1,21 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import os
-from models.chatai import chatAI
-from models.pdf import readPDF
-from models.model import Request
-from helpers.utils import getCurrdir, getRelative
-from dotenv import load_dotenv, find_dotenv, set_key
+from database import save_user, user_exists
+from pydantic import BaseModel
+from encrypt import hash_password, check_password
 
-__location__ = getCurrdir() # Current directory (.../back)
-
-env = os.getenv("ENVIRONMENT", "local")
-load_dotenv(dotenv_path=getRelative(f".env.{env}"))
-
-api_key = os.getenv("API_KEY")
-assistant_id = os.getenv("ASSISTANT_ID")
-dotenvpath = find_dotenv(".env.local")
-
+class UserSignup(BaseModel):
+    email: str
+    password: str
 
 # App object
 app = FastAPI()
@@ -47,6 +38,20 @@ app.add_middleware(
 @app.get("/")
 def readRoot():
     return {"HI!!!! o/"}
+
+@app.post("/api/signup")
+async def signup(user: UserSignup):
+    # Check if the user already exists
+    if user_exists(user.email):
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    # Hash the user's password
+    hashed_password = hash_password(user.password)
+
+    # Save the user to the database
+    save_user(user.email, hashed_password)
+
+    return {"message": "User created successfully"}
 
 @app.get("/test")
 def test():
