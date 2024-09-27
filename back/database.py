@@ -1,7 +1,16 @@
 from pymongo import MongoClient
+from dotenv import load_dotenv, find_dotenv, set_key
+from helpers.utils import getCurrdir, getRelative
+import os
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["mydatabase"]
+__location__ = getCurrdir() # Current directory (.../back)
+
+env = os.getenv("ENVIRONMENT", "local")
+load_dotenv(dotenv_path=getRelative(f".env.{env}"))
+uri = os.getenv("MONGODB_URI")
+
+client = MongoClient(uri)
+db = client["MainDatabase"]
 users_collection = db["usuarios"]
 
 # Check if a user already exists by email
@@ -15,3 +24,8 @@ def save_user(email: str, hashed_password: bytes):
         "password": hashed_password,
     }
     users_collection.insert_one(user_document)
+
+# Get all users from the collection
+def get_all_users():
+    users_cursor = users_collection.find({}, {"_id": 0})  
+    return list(users_cursor)

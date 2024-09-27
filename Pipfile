@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "==0.65.1"
+uvicorn = "==0.14.0"
+motor = "==2.4.0"
+openai = "*"
+python-dotenv = "==1.0.1"
+fitz = "*"
+pymupdf = "*"
+bcrypt = "*"
+pydantic = "*"
+pymongo = {extras = ["srv"], version = "*"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"

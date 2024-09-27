@@ -6,5 +6,5 @@ python-dotenv==1.0.1
 fitz
 pymupdf
 bcrypt
-pymongo
+pymongo[srv]
 pydantic

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from database import save_user, user_exists
+from database import save_user, user_exists, get_all_users
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
 import os
@@ -14,7 +14,6 @@ __location__ = getCurrdir() # Current directory (.../back)
 
 env = os.getenv("ENVIRONMENT", "local")
 load_dotenv(dotenv_path=getRelative(f".env.{env}"))
-
 api_key = os.getenv("API_KEY")
 assistant_id = os.getenv("ASSISTANT_ID")
 dotenvpath = find_dotenv(".env.local")
@@ -26,18 +25,18 @@ class UserSignup(BaseModel):
 
 # App object
 app = FastAPI()
-chatai = chatAI(api_key)
+# chatai = chatAI(api_key)
 readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 
 # Creating/Loading ai
 
 if assistant_id == None:
-    chatai.generatePrompt(readpdf.items)
-    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+    # chatai.generatePrompt(readpdf.items)
+    # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
 
 else:
-    chatai.loadAssisant(assistant_id)
+    # chatai.loadAssisant(assistant_id)
     print("Loading...")
 
 # Allowed origins for CORS
@@ -69,17 +68,25 @@ async def signup(user: UserSignup):
 
     return {"message": "User created successfully"}
 
+# Route to get all users
+@app.get("/api/users")
+async def get_users():
+    users = get_all_users()
+    if not users:
+        raise HTTPException(status_code=404, detail="No users found")
+    return {"users": users}
+
 @app.get("/test")
 def test():
     print(readpdf.text)
     print(getRelative("../modules"))
 
-@app.get("/chat") # From the frontend: if not threadid JWT, then get
-def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-    return {chatai.createThread()} # This must be passed via JWT
+# @app.get("/chat") # From the frontend: if not threadid JWT, then get
+# def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
+#     return {chatai.createThread()} # This must be passed via JWT
 
-@app.post("/chat")
-def getResponse(request : Request):
-    chatai.createMessage(request.message, request.threadid)
-    response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
-    return response
+# @app.post("/chat")
+# def getResponse(request : Request):
+#     chatai.createMessage(request.message, request.threadid)
+#     response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
+#     return response
