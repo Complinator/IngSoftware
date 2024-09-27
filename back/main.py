@@ -3,6 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import save_user, user_exists
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
+import os
+from models.chatai import chatAI
+from models.pdf import readPDF
+from models.model import Request
+from helpers.utils import getCurrdir, getRelative
+from dotenv import load_dotenv, find_dotenv, set_key
+
+__location__ = getCurrdir() # Current directory (.../back)
+
+env = os.getenv("ENVIRONMENT", "local")
+load_dotenv(dotenv_path=getRelative(f".env.{env}"))
+
+api_key = os.getenv("API_KEY")
+assistant_id = os.getenv("ASSISTANT_ID")
+dotenvpath = find_dotenv(".env.local")
+
 
 class UserSignup(BaseModel):
     email: str
