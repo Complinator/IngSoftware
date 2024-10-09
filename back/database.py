@@ -29,3 +29,8 @@ def save_user(email: str, hashed_password: bytes):
 def get_all_users():
     users_cursor = users_collection.find({}, {"_id": 0})  
     return list(users_cursor)
+
+
+def get_user_by_email(email: str):
+    user = users_collection.find_one({"email": email})
+    return user

@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from database import save_user, user_exists, get_all_users
+from fastapi_jwt_auth import AuthJWT
+from fastapi_jwt_auth.exceptions import AuthJWTException
+from database import save_user, user_exists, get_all_users, get_user_by_email
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
 import os
@@ -68,22 +70,45 @@ async def signup(user: UserSignup):
 
     return {"message": "User created successfully"}
 
+@app.post("/api/login")
+async def login(user: UserLogin, Authorize: AuthJWT = Depends()):
+    db_user = get_user_by_email(user.email)
+    if not db_user or not check_password(db_user["password"], user.password):
+        raise HTTPException(status_code=400, detail="Invalid email or password")
+
+    access_token = Authorize.create_access_token(subject=db_user["email"])
+    return {"access_token": access_token}
+
 # Route to get all users
 @app.get("/api/users")
-async def get_users():
+async def get_users(Authorize: AuthJWT = Depends()):
+    Authorize.jwt_required()
+    current_user = Authorize.get_jwt_subject()
+
+    if current_user != "admin@example.com":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
     users = get_all_users()
     if not users:
         raise HTTPException(status_code=404, detail="No users found")
+
     return {"users": users}
+
 
 @app.get("/test")
 def test():
     print(readpdf.text)
     print(getRelative("../modules"))
 
-# @app.get("/chat") # From the frontend: if not threadid JWT, then get
-# def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-#     return {chatai.createThread()} # This must be passed via JWT
+
+@app.post("/chat")
+async def get_response(request: Request, Authorize: AuthJWT = Depends()):
+    current_user = Authorize.get_jwt_subject()
+
+    chatai.createMessage(request.message, request.threadid)
+    response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
+
+    return {"response": response}
 
 # @app.post("/chat")
 # def getResponse(request : Request):
