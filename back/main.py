@@ -25,7 +25,7 @@ class UserSignup(BaseModel):
 
 # App object
 app = FastAPI()
-# chatai = chatAI(api_key)
+chatai = chatAI(api_key)
 readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 
 # Creating/Loading ai
@@ -40,7 +40,7 @@ else:
     print("Loading...")
 
 # Allowed origins for CORS
-origins = ["https://localhost:3000", "http://localhost:3000"]
+origins = ["http://localhost:3000/chat"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,12 +81,16 @@ def test():
     print(readpdf.text)
     print(getRelative("../modules"))
 
-# @app.get("/chat") # From the frontend: if not threadid JWT, then get
-# def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-#     return {chatai.createThread()} # This must be passed via JWT
+@app.get("/chat") # From the frontend: if not threadid JWT, then get
+def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
+    #return {chatai.createThread()} # This must be passed via JWT
+    
+    thread_id = chatai.createThread()
+    return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
-# @app.post("/chat")
-# def getResponse(request : Request):
-#     chatai.createMessage(request.message, request.threadid)
-#     response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
-#     return response
+@app.post("/chat")
+async def getResponse(request: Request):
+    message_id = chatai.createMessage(request.message, request.threadid)
+    run_id = chatai.runAssistant(request.threadid)
+    response = chatai.retrieveAssistant(run_id, request.threadid)
+    return {"response": response}
