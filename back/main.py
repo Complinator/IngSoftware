@@ -28,16 +28,16 @@ readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 # Creating/Loading ai
 
 if assistant_id == None:
-    chatai.generatePrompt(readpdf.items)
-    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+    # chatai.generatePrompt(readpdf.items)
+    # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
 
 else:
-    chatai.loadAssisant(assistant_id)
+    # chatai.loadAssisant(assistant_id)
     print("Loading...")
 
 # Allowed origins for CORS
-origins = ["http://localhost:3000/chat"]
+origins = ["http://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,6 +46,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class Settings(BaseModel):
+    authjwt_secret_key: str = "venjamin123"
+
+@AuthJWT.load_config
+def get_config():
+    return Settings()
 
 @app.get("/")
 def readRoot():
@@ -89,7 +96,6 @@ async def get_users(Authorize: AuthJWT = Depends()):
 
     return {"users": users}
 
-
 @app.get("/test")
 def test():
     print(readpdf.text)
@@ -102,11 +108,11 @@ def loadChat(): # This must be triggered in the front, the user must open the ch
     thread_id = chatai.createThread()
     return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
+
 @app.post("/chat")
 async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
     current_user = Authorize.get_jwt_subject()
     message_id = chatai.createMessage(request.message, request.threadid)
     run_id = chatai.runAssistant(request.threadid)
     response = chatai.retrieveAssistant(run_id, request.threadid)
-    
     return {"response": response}
