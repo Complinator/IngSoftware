@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from database import save_user, user_exists, get_all_users
+from database import save_user, user_exists, get_all_users, find_user_by_email
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
 import os
@@ -19,7 +19,7 @@ assistant_id = os.getenv("ASSISTANT_ID")
 dotenvpath = find_dotenv(".env.local")
 
 
-class UserSignup(BaseModel):
+class User(BaseModel):
     email: str
     password: str
 
@@ -55,7 +55,7 @@ def readRoot():
     return {"HI!!!! o/"}
 
 @app.post("/api/signup")
-async def signup(user: UserSignup):
+async def signup(user: User):
     # Check if the user already exists
     if user_exists(user.email):
         raise HTTPException(status_code=400, detail="User already exists")
@@ -67,6 +67,20 @@ async def signup(user: UserSignup):
     save_user(user.email, hashed_password)
 
     return {"message": "User created successfully"}
+
+# Sign-in route
+@app.post("/api/signin")
+async def signin(user: User):
+    user_document = find_user_by_email(user.email)
+    
+    if not user_document:
+        raise HTTPException(status_code=400, detail="User does not exist")
+
+    # Verify password
+    if not check_password(user.password, user_document["password"]):
+        raise HTTPException(status_code=400, detail="Incorrect password")
+
+    return {"message": "Login successful", "email": user.email}
 
 # Route to get all users
 @app.get("/api/users")

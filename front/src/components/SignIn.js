@@ -69,13 +69,46 @@ export default function SignIn(props) {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    const email = data.get('email');
+    const password = data.get('password');
+
+    const payload = {
+      email: email,
+      password: password,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/api/signin", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+          // Login successful
+          console.log("Login successful", result);
+          // You can redirect the user to a dashboard or set the user's logged-in state here
+      } else {
+          // Handle login error
+          console.error("Login failed:", result.detail);
+          alert(result.detail); // Display error message
+      }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred during login.");
+    }
   };
 
   const validateInputs = () => {
