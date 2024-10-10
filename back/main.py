@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -27,7 +27,7 @@ class UserSignup(BaseModel):
 
 # App object
 app = FastAPI()
-# chatai = chatAI(api_key)
+chatai = chatAI(api_key)
 readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 
 # Creating/Loading ai
