@@ -8,7 +8,8 @@ function App() {
   return (
     <>
       <div>
-        <Chat/>
+        <SignIn />
+        {/* <Chat/> */}
       </div>
     </>
   );
