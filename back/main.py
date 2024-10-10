@@ -8,7 +8,7 @@ from encrypt import hash_password, check_password
 import os
 from models.chatai import chatAI
 from models.pdf import readPDF
-from models.model import Request
+from models.model import Request, User
 from helpers.utils import getCurrdir, getRelative
 from dotenv import load_dotenv, find_dotenv, set_key
 
@@ -20,11 +20,6 @@ api_key = os.getenv("API_KEY")
 assistant_id = os.getenv("ASSISTANT_ID")
 dotenvpath = find_dotenv(".env.local")
 
-
-class User(BaseModel):
-    email: str
-    password: str
-
 # App object
 app = FastAPI()
 chatai = chatAI(api_key)
@@ -33,12 +28,12 @@ readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 # Creating/Loading ai
 
 if assistant_id == None:
-    # chatai.generatePrompt(readpdf.items)
-    # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+    chatai.generatePrompt(readpdf.items)
+    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
 
 else:
-    # chatai.loadAssisant(assistant_id)
+    chatai.loadAssisant(assistant_id)
     print("Loading...")
 
 # Allowed origins for CORS
@@ -109,8 +104,8 @@ async def get_response(request: Request, Authorize: AuthJWT = Depends()):
 
     return {"response": response}
 
-# @app.post("/chat")
-# def getResponse(request : Request):
-#     chatai.createMessage(request.message, request.threadid)
-#     response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
-#     return response
+@app.post("/chat")
+def getResponse(request : Request):
+    chatai.createMessage(request.message, request.threadid)
+    response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
+    return response
