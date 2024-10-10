@@ -14,6 +14,7 @@ pymupdf = "*"
 bcrypt = "*"
 pydantic = "*"
 pymongo = {extras = ["srv"], version = "*"}
+fastapi-jwt-auth = "*"
 
 [dev-packages]
 

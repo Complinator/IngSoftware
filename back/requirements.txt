@@ -8,3 +8,4 @@ pymupdf
 bcrypt
 pymongo[srv]
 pydantic
+fastapi-jwt-auth
