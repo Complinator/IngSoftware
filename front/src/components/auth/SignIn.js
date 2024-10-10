@@ -70,9 +70,19 @@ export default function SignIn(props) {
     setOpen(false);
   };
 
+  // const isValid = validateInputs();
+  //   if (isValid) {
+  //     const data = new FormData(event.currentTarget);
+  //     const email = data.get('email');
+  //     const password = data.get('password');
+      
+  //     console.log({email, password});
+
+  //     onSignIn({ email, password });
+  //   }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-<<<<<<< HEAD:front/src/components/SignIn.js
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
@@ -111,20 +121,6 @@ export default function SignIn(props) {
         console.error("Error:", error);
         alert("An error occurred during login.");
     }
-=======
-
-    const isValid = validateInputs();
-    if (isValid) {
-      const data = new FormData(event.currentTarget);
-      const email = data.get('email');
-      const password = data.get('password');
-      
-      console.log({email, password});
-
-      onSignIn({ email, password });
-    }
-
->>>>>>> origin/componentes_front:front/src/components/auth/SignIn.js
   };
 
   const validateInputs = () => {

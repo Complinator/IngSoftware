@@ -6,17 +6,24 @@ const Chat = () => {
     const [threadId, setThreadId] = useState(0);
     // Esta función hará la solicitud GET al backend para obtener el threadId
 
-    const initializeChat = () => {
+    const initializeChat = async () => {
+        if (!sessionStorage.getItem("thread_id")) {
         try {
-            const response = fetch('/chat');  // Llamada GET
+            const response = await fetch("http://localhost:8000/chat", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            const data = response;  // Asegúrate de recibir JSON aquí
+            const data = await response.json();
             setThreadId(data.threadid);
+            sessionStorage.setItem("thread_id", data.threadid)
         } catch (error) {
             console.error("Error initializing chat:", error);
-        }
+        }} 
     };
 
     // Usamos useEffect para llamar a initializeChat cuando el usuario abre el chat

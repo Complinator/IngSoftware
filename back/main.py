@@ -37,7 +37,7 @@ else:
     print("Loading...")
 
 # Allowed origins for CORS
-origins = ["http://localhost:3000/chat"]
+origins = ["http://localhost:3000", "https://localhost:3000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -100,6 +100,7 @@ def loadChat(): # This must be triggered in the front, the user must open the ch
     #return {chatai.createThread()} # This must be passed via JWT
     
     thread_id = chatai.createThread()
+    print(thread_id)
     return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
 @app.post("/chat")
@@ -108,5 +109,5 @@ async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
     message_id = chatai.createMessage(request.message, request.threadid)
     run_id = chatai.runAssistant(request.threadid)
     response = chatai.retrieveAssistant(run_id, request.threadid)
-    
+
     return {"response": response}
