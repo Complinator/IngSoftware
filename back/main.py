@@ -37,7 +37,7 @@ else:
     print("Loading...")
 
 # Allowed origins for CORS
-origins = ["https://localhost:3000", "http://localhost:3000"]
+origins = ["http://localhost:3000/chat"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -95,17 +95,18 @@ def test():
     print(readpdf.text)
     print(getRelative("../modules"))
 
+@app.get("/chat") # From the frontend: if not threadid JWT, then get
+def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
+    #return {chatai.createThread()} # This must be passed via JWT
+    
+    thread_id = chatai.createThread()
+    return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
 @app.post("/chat")
-async def get_response(request: Request, Authorize: AuthJWT = Depends()):
+async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
     current_user = Authorize.get_jwt_subject()
-    chatAI.createMessage(request.message, request.threadid)
-    response = chatAI.retrieveAssistant(chatAI.runAssistant(request.threadid), request.threadid)
-
+    message_id = chatai.createMessage(request.message, request.threadid)
+    run_id = chatai.runAssistant(request.threadid)
+    response = chatai.retrieveAssistant(run_id, request.threadid)
+    
     return {"response": response}
-
-@app.post("/chat")
-def getResponse(request : Request):
-    chatai.createMessage(request.message, request.threadid)
-    response = chatai.retrieveAssistant(chatai.runAssistant(request.threadid), request.threadid)
-    return response

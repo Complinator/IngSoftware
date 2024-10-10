@@ -95,9 +95,16 @@ class chatAI:
         )
     
     def createThread(self):
-        thread = self.client.beta.threads.create()
-        return thread.id
+        # thread = self.client.beta.threads.create()
+        # return thread.id
     
+        try:
+            thread = self.client.beta.threads.create()  # Verifica que esta función sea válida
+            return thread.id
+        except Exception as e:
+            print(f"Error creating thread: {e}")
+            return None
+            
     def createMessage(self,  content : str, tid : str):
         message = self.client.beta.threads.messages.create(
             thread_id=tid,

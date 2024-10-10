@@ -4,7 +4,6 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
@@ -14,7 +13,7 @@ import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
+import { SitemarkIcon } from './CustomIcons';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -55,6 +54,8 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn(props) {
+  const { onSignIn } = props; 
+
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -71,6 +72,7 @@ export default function SignIn(props) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+<<<<<<< HEAD:front/src/components/SignIn.js
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
@@ -109,6 +111,20 @@ export default function SignIn(props) {
         console.error("Error:", error);
         alert("An error occurred during login.");
     }
+=======
+
+    const isValid = validateInputs();
+    if (isValid) {
+      const data = new FormData(event.currentTarget);
+      const email = data.get('email');
+      const password = data.get('password');
+      
+      console.log({email, password});
+
+      onSignIn({ email, password });
+    }
+
+>>>>>>> origin/componentes_front:front/src/components/auth/SignIn.js
   };
 
   const validateInputs = () => {

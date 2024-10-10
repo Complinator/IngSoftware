@@ -1,12 +1,42 @@
-import logo from './logo.svg';
 import './App.css';
-import SignIn from './components/SignIn';
+import SignIn from './components/auth/SignIn';
+import React, { useState } from 'react';
+import Chat from './components/chatbot/chat';
 
 
 function App() {
   return (
-    <SignIn/>
+    <>
+      <div>
+        <Chat/>
+      </div>
+    </>
   );
 }
 
+/* 
+function App() {
+
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  // Función para manejar el inicio de sesión
+  const handleSignIn = (credentials) => {
+      setIsAuthenticated(true);
+  };
+
+  return (
+    <>
+      {isAuthenticated ? (
+        // Si está autenticado, muestra el componente Home
+        <div>
+          hola mundo
+        </div>
+      ) : (
+        // Si no está autenticado, muestra el componente SignIn
+        <SignIn onSignIn={handleSignIn} />
+      )}
+    </>
+  );
+}
+*/
 export default App;
