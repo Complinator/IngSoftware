@@ -27,7 +27,7 @@ class User(BaseModel):
 
 # App object
 app = FastAPI()
-# chatai = chatAI(api_key)
+chatai = chatAI(api_key)
 readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
 
 # Creating/Loading ai
