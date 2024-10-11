@@ -39,7 +39,7 @@ app.add_middleware(
 
 
 chatai = chatAI(api_key)
-readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
+# readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
 
 # Creating/Loading ai
 
@@ -49,9 +49,12 @@ if assistant_id == None:
     print("Creating...")
 
 else:
-    # chatai.loadAssisant(assistant_id)
+    chatai.loadAssisant(assistant_id)
     print("Loading...")
 
+documents_folder = getRelative("documents")
+if not os.path.exists(documents_folder):
+    os.makedirs(documents_folder)
 
 class Settings(BaseModel):
     authjwt_secret_key: str = "venjamin123"
@@ -113,7 +116,7 @@ async def get_files():
 
 @app.get("/test")
 def test():
-    print(readpdf.text)
+    # print(readpdf.text)
     print(getRelative("../modules"))
 
 @app.get("/chat") # From the frontend: if not threadid JWT, then get
@@ -137,7 +140,7 @@ async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    file_location = f"documents/{file.filename}"
+    file_location = getRelative(f"documents/{file.filename}")
     with open(file_location, "wb") as f:
         f.write(await file.read())
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
