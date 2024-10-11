@@ -51,14 +51,18 @@ const AssistantList = () => {
   };
 
   const handleDelete = async (id) => {
+    setSelectedAssistantId(localStorage.getItem("assistantid"));
+    console.log({assistantid: id})
     try {
-      const response = await fetch(`http://localhost:8000/assistants/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`http://localhost:8000/api/delete-assistant`, {
+        method: 'POST',
+        body: JSON.stringify({assistantid: id})
       });
       if (!response.ok) {
         throw new Error('Failed to delete assistant');
       }
       setAssistants(assistants.filter(assistant => assistant.id !== id));
+      fetchAssistants()
       if (id === selectedAssistantId) {
         localStorage.removeItem('assistantid');
         setSelectedAssistantId(null);
@@ -109,8 +113,8 @@ const AssistantList = () => {
                 <IconButton
                   edge="end"
                   aria-label="delete"
-                  
-                >{/* onClick={() => handleDelete(assistant.id)} */}
+                  onClick={() => handleDelete(assistant.id)}
+                >
                   <DeleteIcon />
                 </IconButton>
                 <IconButton
@@ -125,7 +129,7 @@ const AssistantList = () => {
               </>
             }
           >
-            <ListItemText primary={assistant.name} />
+            <ListItemText primary={assistant.name} secondary={`ID: ${assistant.id}`} />
           </ListItem>
         ))}
       </List>
