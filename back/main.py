@@ -130,7 +130,7 @@ def loadChat(): # This must be triggered in the front, the user must open the ch
 async def getResponse(request: Request): #Authorize: AuthJWT = Depends()
     # current_user = Authorize.get_jwt_subject()
     message_id = chatai.createMessage(request.message, request.threadid)
-    run_id = chatai.runAssistant(request.threadid)
+    run_id = chatai.runAssistant(request.threadid, request.assistantid)
     response = chatai.retrieveAssistant(run_id, request.threadid)
 
     return {"response": response}

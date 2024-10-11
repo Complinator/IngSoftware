@@ -72,19 +72,19 @@ class chatAI:
         if self.prompt == "":
             raise Exception("Prompt not generated yet. Try running generatePrompt(dict)")
         
-        self.assistant = self.client.beta.assistants.create(
+        assistant = self.client.beta.assistants.create(
             name=name,
             instructions=self.prompt,
             model="gpt-4o-mini",
             temperature=0,
         )
-        return self.assistant.id
+        return assistant.id
     
     def loadAssisant(self, id : str):
-        self.assistant = self.client.beta.assistants.retrieve(
+        assistant = self.client.beta.assistants.retrieve(
             assistant_id=id,
         )
-        return self.assistant.id
+        return assistant.id
     
     def modifyAssistant(self):
         pass
@@ -96,9 +96,9 @@ class chatAI:
 
         return assistants
 
-    def removeAssistant(self):
+    def removeAssistant(self, assistantid : str):
         self.client.beta.assistants.delete(
-            assistant_id=self.assistant.id,
+            assistant_id=assistantid,
         )
     
     def createThread(self):
@@ -120,10 +120,10 @@ class chatAI:
         )
         return message.id
 
-    def runAssistant(self, tid : str):
+    def runAssistant(self, tid : str, assistantid : str):
         run = self.client.beta.threads.runs.create(
             thread_id=tid,
-            assistant_id=self.assistant.id,
+            assistant_id=assistantid,
         )
         return run.id
     

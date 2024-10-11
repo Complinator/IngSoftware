@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  IconButton, 
-  Button, 
-  Typography, 
-  CircularProgress 
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Button,
+  Typography,
+  CircularProgress
 } from '@mui/material';
-import { 
-  Delete as DeleteIcon, 
-  CheckCircle as CheckCircleIcon, 
-  Add as AddIcon 
+import {
+  Delete as DeleteIcon,
+  CheckCircle as CheckCircleIcon,
+  Add as AddIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,10 +20,19 @@ const AssistantList = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedAssistantId, setSelectedAssistantId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    setSelectedAssistantId(localStorage.getItem('assistantid'));
+  })
+
+  useEffect(() => {
     fetchAssistants();
+    const storedAssistantId = localStorage.getItem('assistantid');
+    if (storedAssistantId) {
+      setSelectedAssistantId(storedAssistantId);
+    }
   }, []);
 
   const fetchAssistants = async () => {
@@ -50,24 +59,18 @@ const AssistantList = () => {
         throw new Error('Failed to delete assistant');
       }
       setAssistants(assistants.filter(assistant => assistant.id !== id));
+      if (id === selectedAssistantId) {
+        localStorage.removeItem('assistantid');
+        setSelectedAssistantId(null);
+      }
     } catch (err) {
       setError(err.message);
     }
   };
 
   const handleChoose = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:8000/assistants/${id}/choose`, {
-        method: 'POST',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to choose assistant');
-      }
-      // You might want to update the UI to reflect the chosen assistant
-      alert(`Assistant ${id} chosen successfully`);
-    } catch (err) {
-      setError(err.message);
-    }
+    localStorage.setItem('assistantid', id);
+    setSelectedAssistantId(id);
   };
 
   if (loading) {
@@ -81,9 +84,11 @@ const AssistantList = () => {
   if (assistants.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="h6" gutterBottom>There is nothing to show</Typography>
-        <Button 
-          variant="contained" 
+        <Typography variant="h6" gutterBottom>
+          There is nothing to show
+        </Typography>
+        <Button
+          variant="contained"
           startIcon={<AddIcon />}
           onClick={() => navigate('/sidebar/select-pdf')}
         >
@@ -94,29 +99,39 @@ const AssistantList = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 600, margin: 'auto', mt: 4 }}>
+    <Box>
       <List>
         {assistants.map((assistant) => (
           <ListItem
             key={assistant.id}
             secondaryAction={
-              <Box>
-                <IconButton edge="end" aria-label="delete" onClick={console.log("delete")} >{/*onClick={() => handleDelete(assistant.id)}*/}
+              <>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  
+                >{/* onClick={() => handleDelete(assistant.id)} */}
                   <DeleteIcon />
                 </IconButton>
-                <IconButton edge="end" aria-label="choose" onClick={console.log("choose")} >{/* onClick={() => handleChoose(assistant.id)} */}
-                  <CheckCircleIcon />
+                <IconButton
+                  edge="end"
+                  aria-label="select"
+                  onClick={() => handleChoose(assistant.id)}
+                >
+                  <CheckCircleIcon
+                    color={selectedAssistantId === assistant.id ? 'success' : 'disabled'}
+                  />
                 </IconButton>
-              </Box>
+              </>
             }
           >
-            <ListItemText primary={assistant.name} secondary={`ID: ${assistant.id}`} />
+            <ListItemText primary={assistant.name} />
           </ListItem>
         ))}
       </List>
-      <Button 
-        variant="contained" 
-        startIcon={<AddIcon />} 
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
         onClick={() => navigate('/sidebar/select-pdf')}
         sx={{ mt: 2 }}
       >

@@ -8,10 +8,12 @@ import {
   Container,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Button
 } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -29,6 +31,8 @@ const ChatComponent = () => {
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef(null);
   const [threadid, setThreadid] = useState(sessionStorage.getItem("thread_id"));
+  const [assistantId, setAssistantId] = useState(localStorage.getItem("assistantid"));
+  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,7 +47,7 @@ const ChatComponent = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({threadid: threadid, message: message})
+            body: JSON.stringify({threadid: threadid, message: message, assistantid: assistantId})
         });
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -62,17 +66,47 @@ const ChatComponent = () => {
       setMessages(prevMessages => [...prevMessages, newMessage]);
 
       setThreadid(sessionStorage.getItem("thread_id"));
+      setAssistantId(localStorage.getItem("assistantid"));
       
-      // Send the current inputMessage, not the state variable
       const backendResponse = await getResponse(inputMessage);
       
       setInputMessage('');
       
-      // Add the backend response to messages
       const backendMessage = { text: backendResponse, sender: "backend" };
       setMessages(prevMessages => [...prevMessages, backendMessage]);
     }
   };
+
+  if (!localStorage.getItem("assistantid")) {
+    return (
+      <ThemeProvider theme={theme}>
+        <Container maxWidth="sm">
+          <Paper elevation={3} sx={{ p: 4, mt: 4, textAlign: 'center' }}>
+            <Typography variant="h5" gutterBottom>
+              There is no assistant loaded yet
+            </Typography>
+            <Box sx={{ mt: 3 }}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                sx={{ mr: 2, mb: 2 }}
+                onClick={() => navigate('/sidebar/bot-selection')}
+              >
+                Load an existing assistant
+              </Button>
+              <Button 
+                variant="outlined" 
+                color="secondary"
+                onClick={() => navigate('/sidebar/select-pdf')}
+              >
+                Create a new assistant
+              </Button>
+            </Box>
+          </Paper>
+        </Container>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
