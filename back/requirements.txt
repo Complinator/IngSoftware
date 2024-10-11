@@ -9,3 +9,4 @@ bcrypt
 pymongo[srv]
 pydantic
 fastapi_jwt_auth
+python-multipart

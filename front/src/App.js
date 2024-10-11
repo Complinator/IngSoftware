@@ -1,19 +1,26 @@
 import './App.css';
 import SignIn from './components/auth/SignIn';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Chat from './components/chatbot/chat';
 import SelectPDF from './components/selectPDF/SelectPDF';
 import ChatbotDataSelection from './components/ChatbotDataSelection';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import ChatLayoutComponent from './components/sidebar';
 
 function App() {
+  const { isAuthenticated } = useAuth();
+  console.log(isAuthenticated);
   return (
-    <>
-      <div>
-        {/*<Chat/>*/}
-        <SelectPDF/>
-        <ChatbotDataSelection/>
-      </div>
-    </>
+      <Router>
+        <Routes>
+          <Route path="/" element={<SignIn />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/chat" element={isAuthenticated ? <ChatLayoutComponent /> : <Navigate to="/login" />} />
+          <Route path="/select-pdf" element={isAuthenticated ? <SelectPDF /> : <Navigate to="/login" />} />
+          <Route path="/bot-selection" element={isAuthenticated ? <ChatbotDataSelection /> : <Navigate to="/login" />} />
+        </Routes>
+      </Router>
   );
 }
 

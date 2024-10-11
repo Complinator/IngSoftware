@@ -15,6 +15,9 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -54,12 +57,34 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
+const initializeChat = async () => {
+  if (!sessionStorage.getItem("thread_id")) {
+  try {
+      const response = await fetch("http://localhost:8000/chat", {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+      });
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      sessionStorage.setItem("thread_id", data.threadid)
+  } catch (error) {
+      console.error("Error initializing chat:", error);
+  }} 
+};
+
 export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const { login } = useAuth(); // Use login from AuthContext
+  const navigate = useNavigate(); // To redirect the user
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -68,17 +93,6 @@ export default function SignIn(props) {
   const handleClose = () => {
     setOpen(false);
   };
-
-  // const isValid = validateInputs();
-  //   if (isValid) {
-  //     const data = new FormData(event.currentTarget);
-  //     const email = data.get('email');
-  //     const password = data.get('password');
-      
-  //     console.log({email, password});
-
-  //     onSignIn({ email, password });
-  //   }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -106,8 +120,10 @@ export default function SignIn(props) {
       });
 
       const result = await response.json();
-
       if (response.ok) {
+          login(result);
+          navigate('/chat');
+          initializeChat();
           // Login successful
           console.log("Login successful", result);
           // You can redirect the user to a dashboard or set the user's logged-in state here
@@ -147,7 +163,7 @@ export default function SignIn(props) {
     }
 
     return isValid;
-  };
+  }
 
   return (
     <div>
