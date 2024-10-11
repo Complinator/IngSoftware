@@ -184,5 +184,9 @@ class LoadAssistantRequest(BaseModel):
 
 @app.post("/api/load-assistant")
 async def load_assistant(request: LoadAssistantRequest):
-    chatai.loadAssisant(request.assistant_id)
-    return {"message": "Assistant loaded successfully"}
+    chatai.loadAssistant(request.assistant_id)
+    return {"assistant_id": chatai.assistant.id, "assistant_name": chatai.assistant.name}
+
+@app.get("/api/current-assistant")
+async def current_assistant():
+    return {"assistant_id": chatai.assistant.id}

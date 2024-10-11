@@ -17,10 +17,12 @@ import {
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
+import { useAssistant } from '../../context/AssistantContext';
+
 
 const PDFDragDrop = () => {
   const [files, setFiles] = useState([]);
-
+  const assistantInfo = useAssistant();
   const onDrop = useCallback((acceptedFiles) => {
     const pdfFiles = acceptedFiles.filter(
       file => file.type === 'application/pdf'
@@ -78,6 +80,10 @@ const PDFDragDrop = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 500, margin: 'auto' }}>
+      <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
+            <Typography variant="h6">Assistant Name: {assistantInfo.assistantInfo.name}</Typography>
+            <Typography variant="subtitle1">Assistant ID: {assistantInfo.assistantInfo.id}</Typography>
+      </Box>
       <Paper
         {...getRootProps()}
         sx={{

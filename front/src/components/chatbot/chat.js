@@ -15,6 +15,7 @@ import { Send as SendIcon } from '@mui/icons-material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
+import { useAssistant } from '../../context/AssistantContext';
 const theme = createTheme({
   palette: {
     primary: {
@@ -27,6 +28,8 @@ const theme = createTheme({
 });
 
 const ChatComponent = () => {
+
+  const assistantInfo = useAssistant();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const messagesEndRef = useRef(null);
@@ -47,7 +50,7 @@ const ChatComponent = () => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({threadid: threadid, message: message, assistantid: assistantId})
+            body: JSON.stringify({threadid: threadid, message: message, assistantid: assistantInfo.assistantInfo.id}),
         });
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -77,7 +80,7 @@ const ChatComponent = () => {
     }
   };
 
-  if (!localStorage.getItem("assistantid")) {
+  if (!assistantInfo.assistantInfo.id) {
     return (
       <ThemeProvider theme={theme}>
         <Container maxWidth="sm">
@@ -112,6 +115,10 @@ const ChatComponent = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ height: '80vh', display: 'flex', flexDirection: 'column', mt: 2 }}>
+          <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
+            <Typography variant="h6">Assistant Name: {assistantInfo.assistantInfo.name}</Typography>
+            <Typography variant="subtitle1">Assistant ID: {assistantInfo.assistantInfo.id}</Typography>
+          </Box>
           <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
             <List>
               {messages.map((message, index) => (

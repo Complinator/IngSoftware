@@ -10,11 +10,12 @@ import { useAuth } from './context/AuthContext';
 import ChatLayoutComponent from './components/sidebar';
 import ChatComponent from './components/chatbot/chat';
 import AssistantList from './components/selectBOT';
-
+import { AssistantProvider } from './context/AssistantContext';
 function App() {
   const { isAuthenticated } = useAuth();
   console.log(isAuthenticated);
   return (
+    <AssistantProvider>
     <Routes>
       <Route path="/" element={<SignIn />} />
       <Route path="/login" element={<SignIn />} />
@@ -25,6 +26,7 @@ function App() {
       <Route path="bot-selection" element={isAuthenticated ? <AssistantList /> : <Navigate to="/login" />} />
       </Route>
     </Routes>
+    </AssistantProvider>
   );
 }
 

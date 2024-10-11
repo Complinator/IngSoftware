@@ -69,8 +69,8 @@ class chatAI:
         '''
 
     def createAssistant(self, name : str):
-        if self.prompt == "":
-            raise Exception("Prompt not generated yet. Try running generatePrompt(dict)")
+        
+        self.generatePrompt()
         
         assistant = self.client.beta.assistants.create(
             name=name,
@@ -84,6 +84,7 @@ class chatAI:
         assistant = self.client.beta.assistants.retrieve(
             assistant_id=id,
         )
+        self.assistant = assistant
         return assistant.id
     
     def modifyAssistant(self):

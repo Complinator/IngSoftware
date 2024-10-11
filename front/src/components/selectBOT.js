@@ -15,24 +15,18 @@ import {
   Add as AddIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { useAssistant } from '../context/AssistantContext';
 const AssistantList = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedAssistantId, setSelectedAssistantId] = useState(null);
+  const assistantInfo = useAssistant();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setSelectedAssistantId(localStorage.getItem('assistantid'));
-  })
-
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
   useEffect(() => {
     fetchAssistants();
-    const storedAssistantId = localStorage.getItem('assistantid');
-    if (storedAssistantId) {
-      setSelectedAssistantId(storedAssistantId);
-    }
   }, []);
 
   const fetchAssistants = async () => {
@@ -51,8 +45,6 @@ const AssistantList = () => {
   };
 
   const handleDelete = async (id) => {
-    setSelectedAssistantId(localStorage.getItem("assistantid"));
-    console.log({assistantid: id})
     try {
       const response = await fetch(`http://localhost:8000/api/delete-assistant`, {
         method: 'POST',
@@ -63,18 +55,67 @@ const AssistantList = () => {
       }
       setAssistants(assistants.filter(assistant => assistant.id !== id));
       fetchAssistants()
-      if (id === selectedAssistantId) {
-        localStorage.removeItem('assistantid');
-        setSelectedAssistantId(null);
+      if (id === assistantInfo.assistantInfo.id) {
+        assistantInfo.setAssistantInfo({name: '', id: ''});
       }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setName('');
+  };
+  const handleSubmit = async () => {
+    if (name.trim() === '') {
+      alert('Name field cannot be empty');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/create-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create assistant');
+      }
+      const newAssistant = await response.json();
+      setAssistants([...assistants, newAssistant]);
+      handleClose();
     } catch (err) {
       setError(err.message);
     }
   };
 
   const handleChoose = async (id) => {
-    localStorage.setItem('assistantid', id);
-    setSelectedAssistantId(id);
+    try {
+      const response = await fetch('http://localhost:8000/api/load-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ assistant_id: id }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to choose assistant');
+      }
+      const data = await response.json();
+      console.log(data);
+      assistantInfo.setAssistantInfo({ name: data.assistant_name, id: data.assistant_id });
+      // You might want to update the UI to reflect the chosen assistant
+      console.log(assistantInfo.assistantInfo);
+      alert(`Assistant ${data.name} chosen successfully`);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   if (loading) {
@@ -109,12 +150,8 @@ const AssistantList = () => {
           <ListItem
             key={assistant.id}
             secondaryAction={
-              <>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleDelete(assistant.id)}
-                >
+              <Box>
+                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(assistant.id)} >{/*onClick={() => handleDelete(assistant.id)}*/}
                   <DeleteIcon />
                 </IconButton>
                 <IconButton
@@ -123,24 +160,42 @@ const AssistantList = () => {
                   onClick={() => handleChoose(assistant.id)}
                 >
                   <CheckCircleIcon
-                    color={selectedAssistantId === assistant.id ? 'success' : 'disabled'}
+                    color={assistantInfo.assistantInfo.id === assistant.id ? 'success' : 'disabled'}
                   />
                 </IconButton>
-              </>
+              </Box>
             }
           >
             <ListItemText primary={assistant.name} secondary={`ID: ${assistant.id}`} />
           </ListItem>
         ))}
       </List>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => navigate('/sidebar/select-pdf')}
-        sx={{ mt: 2 }}
-      >
-        Add New Assistant
-      </Button>
+      <Button 
+          variant="contained" 
+          startIcon={<AddIcon />} 
+          onClick={handleOpen}
+          sx={{ mt: 2 }}
+        >
+          Add New Assistant
+        </Button>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>Add New Assistant</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Name"
+              type="text"
+              fullWidth
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </DialogActions>
+        </Dialog>
     </Box>
   );
 };

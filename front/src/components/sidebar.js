@@ -42,7 +42,7 @@ const ChatLayoutComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
-  console.log(isAuthenticated);
+  //console.log(isAuthenticated);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
