@@ -60,7 +60,7 @@ const ChatLayoutComponent = () => {
       <List>
       {menuItems.map((item) => (
           <ListItem 
-            button 
+            button={true.toString()}
             key={item.text} 
             onClick={() => {
               navigate(item.path);

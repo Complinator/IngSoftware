@@ -108,11 +108,11 @@ const AssistantList = () => {
         throw new Error('Failed to choose assistant');
       }
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
       assistantInfo.setAssistantInfo({ name: data.assistant_name, id: data.assistant_id });
       // You might want to update the UI to reflect the chosen assistant
-      console.log(assistantInfo.assistantInfo);
-      alert(`Assistant ${data.name} chosen successfully`);
+      //console.log(assistantInfo.assistantInfo);
+      //alert(`Assistant ${data.name} chosen successfully`);
     } catch (err) {
       setError(err.message);
     }

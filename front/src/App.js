@@ -13,7 +13,7 @@ import AssistantList from './components/selectBOT';
 import { AssistantProvider } from './context/AssistantContext';
 function App() {
   const { isAuthenticated } = useAuth();
-  console.log(isAuthenticated);
+  //console.log(isAuthenticated);
   return (
     <AssistantProvider>
     <Routes>
