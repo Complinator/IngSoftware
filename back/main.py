@@ -39,7 +39,6 @@ app.add_middleware(
 
 chatai = chatAI(api_key)
 # readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
-
 # Creating/Loading ai
 
 if assistant_id == None:
@@ -159,3 +158,7 @@ async def submit_files(request: SubmitFilesRequest):
         else:
             raise HTTPException(status_code=404, detail=f"File '{file_name}' not found")
     return JSONResponse(content={"processed_files": processed_files})
+
+@app.get("/assistants")
+async def getAssistants():
+    return chatai.listAssistant()

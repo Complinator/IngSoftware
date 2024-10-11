@@ -89,6 +89,13 @@ class chatAI:
     def modifyAssistant(self):
         pass
 
+    def listAssistant(self):
+        assistants = []
+        for assistant in self.client.beta.assistants.list().data:
+            assistants.append({"id": assistant.id, "name": assistant.name})
+
+        return assistants
+
     def removeAssistant(self):
         self.client.beta.assistants.delete(
             assistant_id=self.assistant.id,

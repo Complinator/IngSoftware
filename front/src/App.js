@@ -9,6 +9,7 @@ import { Router, Route, Routes, Navigate, useNavigate, useLocation } from 'react
 import { useAuth } from './context/AuthContext';
 import ChatLayoutComponent from './components/sidebar';
 import ChatComponent from './components/chatbot/chat';
+import AssistantList from './components/selectBOT';
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -21,7 +22,7 @@ function App() {
       <Route path="/sidebar" element={isAuthenticated ? <ChatLayoutComponent /> : <Navigate to="/login" />} >
       <Route path="chat" element={isAuthenticated ? <ChatComponent /> : <Navigate to="/login" />} />
       <Route path="select-pdf" element={isAuthenticated ? <PDFDragDrop /> : <Navigate to="/login" />} />
-      <Route path="bot-selection" element={isAuthenticated ? <ChatbotDataSelection /> : <Navigate to="/login" />} />
+      <Route path="bot-selection" element={isAuthenticated ? <AssistantList /> : <Navigate to="/login" />} />
       </Route>
     </Routes>
   );
