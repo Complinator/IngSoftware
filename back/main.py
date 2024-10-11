@@ -123,14 +123,13 @@ def test():
 
 @app.get("/chat") # From the frontend: if not threadid JWT, then get
 def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-    return {chatai.createThread()} # This must be passed via JWT
-    # thread_id = chatai.createThread()
-    # print(thread_id)
-    # return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
+
+    thread_id = chatai.createThread()
+    return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
 @app.post("/chat")
-async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
-    current_user = Authorize.get_jwt_subject()
+async def getResponse(request: Request): #Authorize: AuthJWT = Depends()
+    # current_user = Authorize.get_jwt_subject()
     message_id = chatai.createMessage(request.message, request.threadid)
     run_id = chatai.runAssistant(request.threadid)
     response = chatai.retrieveAssistant(run_id, request.threadid)

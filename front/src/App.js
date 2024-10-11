@@ -6,6 +6,7 @@ import SelectPDF from './components/selectPDF/SelectPDF';
 import ChatbotDataSelection from './components/ChatbotDataSelection';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import ChatLayoutComponent from './components/sidebar';
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -15,7 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<SignIn />} />
           <Route path="/login" element={<SignIn />} />
-          <Route path="/chat" element={isAuthenticated ? <Chat /> : <Navigate to="/login" />} />
+          <Route path="/chat" element={isAuthenticated ? <ChatLayoutComponent /> : <Navigate to="/login" />} />
           <Route path="/select-pdf" element={isAuthenticated ? <SelectPDF /> : <Navigate to="/login" />} />
           <Route path="/bot-selection" element={isAuthenticated ? <ChatbotDataSelection /> : <Navigate to="/login" />} />
         </Routes>

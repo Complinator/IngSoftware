@@ -17,6 +17,7 @@ import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -55,6 +56,25 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
     }),
   },
 }));
+
+const initializeChat = async () => {
+  if (!sessionStorage.getItem("thread_id")) {
+  try {
+      const response = await fetch("http://localhost:8000/chat", {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+          },
+      });
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      sessionStorage.setItem("thread_id", data.threadid)
+  } catch (error) {
+      console.error("Error initializing chat:", error);
+  }} 
+};
 
 export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);
@@ -103,6 +123,7 @@ export default function SignIn(props) {
       if (response.ok) {
           login(result);
           navigate('/chat');
+          initializeChat();
           // Login successful
           console.log("Login successful", result);
           // You can redirect the user to a dashboard or set the user's logged-in state here
@@ -142,7 +163,7 @@ export default function SignIn(props) {
     }
 
     return isValid;
-  };
+  }
 
   return (
     <div>
