@@ -1,4 +1,5 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Security, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -13,6 +14,7 @@ from helpers.utils import getCurrdir, getRelative
 from dotenv import load_dotenv, find_dotenv, set_key
 from fastapi import UploadFile, File
 from fastapi.responses import JSONResponse
+# from auth.auth import Auth
 
 __location__ = getCurrdir() # Current directory (.../back)
 
@@ -21,6 +23,10 @@ load_dotenv(dotenv_path=getRelative(f".env.{env}"))
 api_key = os.getenv("API_KEY")
 assistant_id = os.getenv("ASSISTANT_ID")
 dotenvpath = find_dotenv(".env.local")
+
+# Auth
+security = HTTPBearer()
+# auth_handler = Auth()
 
 # App object
 app = FastAPI()
@@ -38,12 +44,12 @@ app.add_middleware(
 
 
 chatai = chatAI(api_key)
-# readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
+readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
 # Creating/Loading ai
 
 if assistant_id == None:
-    # chatai.generatePrompt(readpdf.items)
-    # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+    chatai.generatePrompt(readpdf.items)
+    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
 
 else:
@@ -68,6 +74,24 @@ def get_config():
 def readRoot():
     return {"HI!!!! o/"}
 
+@app.post('/secret')
+def secret_data(credentials: HTTPAuthorizationCredentials = Security(security)):
+    token = credentials.credentials
+    if(auth_handler.decode_token(token)):
+        return 'Top Secret data only authorized users can access this info'
+
+@app.post("/api/refresh")
+async def refresh_token(Authorize: AuthJWT = Depends()):
+    try:
+        Authorize.jwt_refresh_token_required()  # Ensure refresh token is present and valid
+    except AuthJWTException as e:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    current_user = Authorize.get_jwt_subject()  # Get the current user
+    new_access_token = Authorize.create_access_token(subject=current_user)
+
+    return {"access_token": new_access_token}
+
 @app.post("/api/signup")
 async def signup(user: User):
     # Check if the user already exists
@@ -89,11 +113,12 @@ async def login(user: User, Authorize: AuthJWT = Depends()):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
     access_token = Authorize.create_access_token(subject=db_user["email"])
-    return {"access_token": access_token}
+    return {'access_token': access_token }
 
 # Route to get all users
 @app.get("/api/users")
 async def get_users(Authorize: AuthJWT = Depends()):
+    
     Authorize.jwt_required()
     current_user = Authorize.get_jwt_subject()
 
@@ -117,12 +142,11 @@ async def get_files():
 
 @app.get("/test")
 def test():
-    # print(readpdf.text)
+    print(readpdf.text)
     print(getRelative("../modules"))
 
 @app.get("/chat") # From the frontend: if not threadid JWT, then get
 def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-
     thread_id = chatai.createThread()
     return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 

@@ -122,6 +122,8 @@ export default function SignIn(props) {
       const result = await response.json();
       if (response.ok) {
           login(result);
+          localStorage.setItem('access_token', result.access_token);
+          localStorage.setItem('refresh_token', result.refresh_token);
           navigate('/sidebar');
           initializeChat();
           // Login successful
