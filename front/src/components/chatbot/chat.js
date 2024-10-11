@@ -115,10 +115,9 @@ const ChatComponent = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ height: '80vh', display: 'flex', flexDirection: 'column', mt: 2 }}>
-          <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
-            <Typography variant="h6">Assistant Name: {assistantInfo.assistantInfo.name}</Typography>
-            <Typography variant="subtitle1">Assistant ID: {assistantInfo.assistantInfo.id}</Typography>
-          </Box>
+        <Box sx={{ p: 2, backgroundColor: 'background.default', borderBottom: '2px solid rgba(0, 0, 0, 0.12)', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
+    <Typography variant="h6" sx={{ ml: 5 }}>{assistantInfo.assistantInfo.name}</Typography>
+</Box>
           <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
             <List>
               {messages.map((message, index) => (

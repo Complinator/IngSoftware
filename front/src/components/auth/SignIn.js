@@ -97,10 +97,10 @@ export default function SignIn(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
+    /*console.log({
       email: data.get('email'),
       password: data.get('password'),
-    });
+    });*/
 
     const email = data.get('email');
     const password = data.get('password');
@@ -127,7 +127,7 @@ export default function SignIn(props) {
           navigate('/sidebar');
           initializeChat();
           // Login successful
-          console.log("Login successful", result);
+          //console.log("Login successful", result);
           // You can redirect the user to a dashboard or set the user's logged-in state here
       } else {
           // Handle login error
@@ -172,7 +172,7 @@ export default function SignIn(props) {
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
-          <SitemarkIcon />
+          {/*<SitemarkIcon /> */}
           <Typography
             component="h1"
             variant="h4"
