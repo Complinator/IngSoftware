@@ -12,7 +12,6 @@ from models.model import Request, User
 from helpers.utils import getCurrdir, getRelative
 from dotenv import load_dotenv, find_dotenv, set_key
 from fastapi import UploadFile, File
-
 from fastapi.responses import JSONResponse
 
 __location__ = getCurrdir() # Current directory (.../back)
@@ -44,8 +43,8 @@ chatai = chatAI(api_key)
 # Creating/Loading ai
 
 if assistant_id == None:
-    # chatai.generatePrompt(readpdf.items)
-    # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+    chatai.generatePrompt(readpdf.items)
+    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
 
 else:
@@ -56,7 +55,10 @@ documents_folder = getRelative("documents")
 if not os.path.exists(documents_folder):
     os.makedirs(documents_folder)
 
+
 class Settings(BaseModel):
+    # Despues poner esto en .env.local y llamarlo con:
+    # authjwt_secret_key = os.getenv("SECRET_KEY")
     authjwt_secret_key: str = "venjamin123"
 
 @AuthJWT.load_config
@@ -121,12 +123,10 @@ def test():
 
 @app.get("/chat") # From the frontend: if not threadid JWT, then get
 def loadChat(): # This must be triggered in the front, the user must open the chat for it to create the thread, not before
-    #return {chatai.createThread()} # This must be passed via JWT
-    
-    thread_id = chatai.createThread()
-    print(thread_id)
-    return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
-
+    return {chatai.createThread()} # This must be passed via JWT
+    # thread_id = chatai.createThread()
+    # print(thread_id)
+    # return {"threadid": thread_id}  # Asegúrate de devolver un diccionario con clave "threadid"
 
 @app.post("/chat")
 async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
@@ -137,15 +137,12 @@ async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
 
     return {"response": response}
 
-
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     file_location = getRelative(f"documents/{file.filename}")
     with open(file_location, "wb") as f:
         f.write(await file.read())
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
-
-
 
 class SubmitFilesRequest(BaseModel):
     files: list[str]
