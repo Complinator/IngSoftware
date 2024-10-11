@@ -47,7 +47,7 @@ if assistant_id == None:
     print("Creating...")
 
 else:
-    chatai.loadAssisant(assistant_id)
+    chatai.loadAssistant(assistant_id)
     print("Loading...")
 
 documents_folder = getRelative("documents")
@@ -162,3 +162,24 @@ async def submit_files(request: SubmitFilesRequest):
 @app.get("/assistants")
 async def getAssistants():
     return chatai.listAssistant()
+
+@app.post("/api/delete-assistant")
+async def delete_assistant():
+    chatai.removeAssistant()
+    return {"message": "Assistant deleted successfully"}
+
+class CreateAssistantRequest(BaseModel):
+    name: str
+
+@app.post("/api/create-assistant")
+async def create_assistant(request: CreateAssistantRequest):
+    chatai.createAssistant(request.name)
+    return {"message": "Assistant created successfully"}
+
+class LoadAssistantRequest(BaseModel):
+    assistant_id: str
+
+@app.post("/api/load-assistant")
+async def load_assistant(request: LoadAssistantRequest):
+    chatai.loadAssisant(request.assistant_id)
+    return {"message": "Assistant loaded successfully"}

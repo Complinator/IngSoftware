@@ -80,7 +80,7 @@ class chatAI:
         )
         return self.assistant.id
     
-    def loadAssisant(self, id : str):
+    def loadAssistant(self, id : str):
         self.assistant = self.client.beta.assistants.retrieve(
             assistant_id=id,
         )
