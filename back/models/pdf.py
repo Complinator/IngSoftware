@@ -31,3 +31,5 @@ class readPDF:
         
         for i in range(len(rawList)):
             self.items[self.keys[i]] = re.sub(r'\s+', ' ',":".join(rawList[i].strip().split(":")[1:]))
+    def readPDF(self):
+        return self.items
