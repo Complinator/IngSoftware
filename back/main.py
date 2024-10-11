@@ -11,6 +11,9 @@ from models.pdf import readPDF
 from models.model import Request, User
 from helpers.utils import getCurrdir, getRelative
 from dotenv import load_dotenv, find_dotenv, set_key
+from fastapi import UploadFile, File
+
+from fastapi.responses import JSONResponse
 
 __location__ = getCurrdir() # Current directory (.../back)
 
@@ -22,8 +25,21 @@ dotenvpath = find_dotenv(".env.local")
 
 # App object
 app = FastAPI()
+
+# Allowed origins for CORS
+origins = ["http://localhost:3000", "https://localhost:3000", "http://localhost:8000", "https://localhost:8000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 chatai = chatAI(api_key)
-readpdf = readPDF(getRelative("LuquilloWMS.pdf"))
+readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
 
 # Creating/Loading ai
 
@@ -36,16 +52,6 @@ else:
     # chatai.loadAssisant(assistant_id)
     print("Loading...")
 
-# Allowed origins for CORS
-origins = ["http://localhost:3000", "https://localhost:3000"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 class Settings(BaseModel):
     authjwt_secret_key: str = "venjamin123"
@@ -96,6 +102,15 @@ async def get_users(Authorize: AuthJWT = Depends()):
 
     return {"users": users}
 
+@app.get("/api/files")
+async def get_files():
+    documents_path = getRelative("documents")
+    try:
+        files = os.listdir(documents_path)
+        return {"files": files}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Documents folder not found")
+
 @app.get("/test")
 def test():
     print(readpdf.text)
@@ -118,3 +133,30 @@ async def getResponse(request: Request, Authorize: AuthJWT = Depends()):
     response = chatai.retrieveAssistant(run_id, request.threadid)
 
     return {"response": response}
+
+
+@app.post("/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    file_location = f"documents/{file.filename}"
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+
+
+
+class SubmitFilesRequest(BaseModel):
+    files: list[str]
+
+
+@app.post("/api/submit-files")
+async def submit_files(request: SubmitFilesRequest):
+    documents_path = getRelative("documents")
+    processed_files = []
+    for file_name in request.files:
+        file_path = os.path.join(documents_path, file_name)
+        if os.path.exists(file_path):
+            processed_content = readPDF(file_path).readPDF()
+            processed_files.append({"file": file_name, "content": processed_content})
+        else:
+            raise HTTPException(status_code=404, detail=f"File '{file_name}' not found")
+    return JSONResponse(content={"processed_files": processed_files})

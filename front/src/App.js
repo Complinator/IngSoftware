@@ -3,6 +3,7 @@ import SignIn from './components/auth/SignIn';
 import React, { useState } from 'react';
 import Chat from './components/chatbot/chat';
 import SelectPDF from './components/selectPDF/SelectPDF';
+import ChatbotDataSelection from './components/ChatbotDataSelection';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <div>
         {/*<Chat/>*/}
         <SelectPDF/>
+        <ChatbotDataSelection/>
       </div>
     </>
   );
