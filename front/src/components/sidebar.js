@@ -19,7 +19,10 @@ import {
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ChatComponent from './chatbot/chat'; // Import your existing ChatComponent
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Router, Route, Routes, Navigate, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import SelectPDF from './selectPDF/SelectPDF';
+import ChatbotDataSelection from './ChatbotDataSelection';
+import { useAuth } from '../context/AuthContext';
 
 const drawerWidth = 240;
 
@@ -38,15 +41,17 @@ const ChatLayoutComponent = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  console.log(isAuthenticated);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { text: 'Chat', icon: <ChatIcon />, path: '/chat' },
-    { text: 'PDF Settings', icon: <SettingsIcon />, path: '/select-pdf' },
-    { text: 'Bot Select', icon: <SmartToyIcon />, path: '/bot-selection' },
+    { text: 'Chat', icon: <ChatIcon />, path: 'chat' },
+    { text: 'PDF Settings', icon: <SettingsIcon />, path: 'select-pdf' },
+    { text: 'Bot Select', icon: <SmartToyIcon />, path: 'bot-selection' },
   ];
 
   const drawer = (
@@ -124,7 +129,7 @@ const ChatLayoutComponent = () => {
           sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
         >
           <Toolbar /> {/* This toolbar is for spacing below the AppBar */}
-          <ChatComponent />
+            <Outlet />
         </Box>
       </Box>
     </ThemeProvider>

@@ -122,7 +122,7 @@ export default function SignIn(props) {
       const result = await response.json();
       if (response.ok) {
           login(result);
-          navigate('/chat');
+          navigate('/sidebar');
           initializeChat();
           // Login successful
           console.log("Login successful", result);
