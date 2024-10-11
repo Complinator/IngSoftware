@@ -9,13 +9,15 @@ import {
   List,
   ListItem,
   ListItemText,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
 import { useAssistant } from '../../context/AssistantContext';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -28,10 +30,10 @@ const theme = createTheme({
 });
 
 const ChatComponent = () => {
-
   const assistantInfo = useAssistant();
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const [threadid, setThreadid] = useState(sessionStorage.getItem("thread_id"));
   const [assistantId, setAssistantId] = useState(localStorage.getItem("assistantid"));
@@ -41,25 +43,25 @@ const ChatComponent = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(scrollToBottom, [messages, isTyping]);
 
   const getResponse = async (message) => {
     try {
-        const response = await fetch("http://localhost:8000/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({threadid: threadid, message: message, assistantid: assistantInfo.assistantInfo.id}),
-        });
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        return data.response;
+      const response = await fetch("http://localhost:8000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({threadid: threadid, message: message, assistantid: assistantInfo.assistantInfo.id}),
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      return data.response;
     } catch (error) {
-        console.error("Error initializing chat:", error);
-        return "error";
+      console.error("Error initializing chat:", error);
+      return "error";
     }
   }
 
@@ -67,18 +69,30 @@ const ChatComponent = () => {
     if (inputMessage.trim() !== '') {
       const newMessage = { text: inputMessage, sender: 'user' };
       setMessages(prevMessages => [...prevMessages, newMessage]);
+      setInputMessage('');
+      setIsTyping(true);
 
       setThreadid(sessionStorage.getItem("thread_id"));
       setAssistantId(localStorage.getItem("assistantid"));
       
-      const backendResponse = await getResponse(inputMessage);
+      const backendResponse = await getResponse(newMessage.text);
       
-      setInputMessage('');
-      
+      setIsTyping(false);
       const backendMessage = { text: backendResponse, sender: "backend" };
       setMessages(prevMessages => [...prevMessages, backendMessage]);
     }
   };
+
+  const TypingIndicator = () => (
+    <ListItem sx={{ justifyContent: 'flex-start' }}>
+      <Paper elevation={1} sx={{ p: 1, backgroundColor: 'grey.300' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <CircularProgress size={20} sx={{ mr: 1 }} />
+          <Typography variant="body2">Typing...</Typography>
+        </Box>
+      </Paper>
+    </ListItem>
+  );
 
   if (!assistantInfo.assistantInfo.id) {
     return (
@@ -115,9 +129,9 @@ const ChatComponent = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="sm">
         <Paper elevation={3} sx={{ height: '80vh', display: 'flex', flexDirection: 'column', mt: 2 }}>
-        <Box sx={{ p: 2, backgroundColor: 'background.default', borderBottom: '2px solid rgba(0, 0, 0, 0.12)', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
-    <Typography variant="h6" sx={{ ml: 5 }}>{assistantInfo.assistantInfo.name}</Typography>
-</Box>
+          <Box sx={{ p: 2, backgroundColor: 'background.default', borderBottom: '2px solid rgba(0, 0, 0, 0.12)', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
+            <Typography variant="h6" sx={{ ml: 5 }}>{assistantInfo.assistantInfo.name}</Typography>
+          </Box>
           <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
             <List>
               {messages.map((message, index) => (
@@ -139,6 +153,7 @@ const ChatComponent = () => {
                   </Paper>
                 </ListItem>
               ))}
+              {isTyping && <TypingIndicator />}
             </List>
             <div ref={messagesEndRef} />
           </Box>
