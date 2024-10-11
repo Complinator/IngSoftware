@@ -25,6 +25,7 @@ const AssistantList = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [toBeDeleted, setToBeDeleted] = useState({});
   useEffect(() => {
     fetchAssistants();
   }, []);
@@ -54,6 +55,7 @@ const AssistantList = () => {
         throw new Error('Failed to delete assistant');
       }
       setAssistants(assistants.filter(assistant => assistant.id !== id));
+      handleClose()
       fetchAssistants()
       if (id === assistantInfo.assistantInfo.id) {
         assistantInfo.setAssistantInfo({name: '', id: ''});
@@ -62,13 +64,15 @@ const AssistantList = () => {
       setError(err.message);
     }
   };
-  const handleOpen = () => {
+  const handleOpen = (id, name) => {
+    setToBeDeleted({id: id, name: name});
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setName('');
+    setToBeDeleted({});
   };
   const handleSubmit = async () => {
     if (name.trim() === '') {
@@ -151,7 +155,7 @@ const AssistantList = () => {
             key={assistant.id}
             secondaryAction={
               <Box>
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(assistant.id)} >{/*onClick={() => handleDelete(assistant.id)}*/}
+                <IconButton edge="end" aria-label="delete" onClick={() => handleOpen(assistant.id, assistant.name)} >{/*onClick={() => handleDelete(assistant.id)}*/}
                   <DeleteIcon />
                 </IconButton>
                 <IconButton
@@ -173,27 +177,16 @@ const AssistantList = () => {
       <Button 
           variant="contained" 
           startIcon={<AddIcon />} 
-          onClick={handleOpen}
+          onClick={() => {navigate("/sidebar/select-pdf")}}
           sx={{ mt: 2 }}
         >
           Add New Assistant
         </Button>
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Add New Assistant</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Name"
-              type="text"
-              fullWidth
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </DialogContent>
+          <DialogTitle>Are you sure you want to delete {toBeDeleted.name}?</DialogTitle>
           <DialogActions>
             <Button onClick={handleClose}>Cancel</Button>
-            <Button onClick={handleSubmit}>Submit</Button>
+            <Button onClick={() => {handleDelete(toBeDeleted.id)}}>Delete</Button>
           </DialogActions>
         </Dialog>
     </Box>
