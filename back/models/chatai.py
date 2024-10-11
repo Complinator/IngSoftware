@@ -4,10 +4,10 @@ import time
 class chatAI:
     def __init__(self, api_key : str):
         self.client = OpenAI(api_key=api_key)
-        self.prompt = ""
 
     def generatePrompt(self, items : dict):
-        self.prompt += f'''
+        prompt = ""
+        prompt += f'''
             Eres el chatbot de una empresa y tu fin principal es la atención al cliente dentro de una página web, la idea es que respondas preguntas al usuario de una manera breve, fácil de entender y, 
             por sobre todo, muy explicita a modo de facilitar el viaje del usuario dentro de la página y mejorar el entendimiento de este sobre la empresa. A continuación habrán unos apartados que guiarán
             como será tu interacción con el usuario:
@@ -15,18 +15,18 @@ class chatAI:
             Trabajarás sobre la empresa {items["Nombre"]}, a continuación, un breve contexto de la empresa: {items["Contexto"]}\n
         '''
         if not (items["Productos"] == "" or items["Productos"].isspace()):
-            self.prompt += f'''
+            prompt += f'''
                 # PRODUCTOS #
                 A continuación, se enumera una serie de productos (o servicios) brindados por la empresa (en caso de estar vacío, ignorar): {items["Productos"]}\n
             '''
 
         if not (items["Extra"] == "" or items["Extra"].isspace()):
-            self.prompt += f'''
+            prompt += f'''
                 # DATOS EXTRA #
                 En esta sección se añadirán información adicional a tomar en cuenta a la hora de responder al usuario (en caso de estar vacío, ignorar): {items["Extra"]}\n
             '''
 
-        self.prompt += '''
+        prompt += '''
             # RESPUESTA #
             El tono de la respuesta debe ser claro y preciso, evita palabras redundantes. Es de suma importancia que la respuesta sea directo al grano y muy explícita para evitar confusiones y no llenar al cliente de información innecesaria.
             La repuesta que debes dar debe ser en formato de texto, ten en cuenta que, al ser un chatbot, el texto que debes de responder jamas puede estar punteado, pues debe de ser en un formato que
@@ -48,7 +48,7 @@ class chatAI:
         '''
 
         if not (items["Rutas"] == "" or items["Rutas"].isspace()):
-            self.prompt += f'''
+            prompt += f'''
                 # RUTAS #
                 Esta seccion está dedicada principalmente a brindar información sobre la página web para poder guiar al usuario en la navegación dentro de la página. A continuación, se muestran todas las
                 rutas de la página web en formato:
@@ -58,7 +58,7 @@ class chatAI:
                 {items["Rutas"]}\n
             '''
 
-        self.prompt += '''
+        prompt += '''
             # LIMITACIONES #
             - La unica información con la que puedes responder es la información dispuesta en el presente mensaje.
             - No puedes hacer asunciones respecto de cosas que no se te fueron dichas, pues esto puede llevar a desinformar al usuario
@@ -67,14 +67,13 @@ class chatAI:
             - En caso de que la información dispuesta no sea suficiente, responder en base a los formatos de respuesta previamente especificados (no realizar asunciones).
             - La respuesta debe ser breve y precisa para que el usuario no deba de recibir tanta información innecesaria, sin embargo, tampoco debes de dejar de lado responder exitosamente la consulta del usuario.\n
         '''
+        return prompt
 
-    def createAssistant(self, name : str):
-        
-        self.generatePrompt()
+    def createAssistant(self, name : str, prompt : str):
         
         assistant = self.client.beta.assistants.create(
             name=name,
-            instructions=self.prompt,
+            instructions=prompt,
             model="gpt-4o-mini",
             temperature=0,
         )

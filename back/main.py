@@ -38,17 +38,12 @@ app.add_middleware(
 
 
 chatai = chatAI(api_key)
-# readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
 # Creating/Loading ai
 
 if assistant_id == None:
     # chatai.generatePrompt(readpdf.items)
     # set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
     print("Creating...")
-
-else:
-    chatai.loadAssistant(assistant_id)
-    print("Loading...")
 
 documents_folder = getRelative("documents")
 if not os.path.exists(documents_folder):
@@ -140,7 +135,10 @@ async def upload_pdf(file: UploadFile = File(...)):
     file_location = getRelative(f"documents/{file.filename}")
     with open(file_location, "wb") as f:
         f.write(await file.read())
-    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+
+    readpdf = readPDF(file_location)
+    chatai.createAssistant(file.filename.replace(".pdf", ""), chatai.generatePrompt(readpdf.items))
+    return {"info": f"Assistant created successfully'"}
 
 class SubmitFilesRequest(BaseModel):
     files: list[str]
