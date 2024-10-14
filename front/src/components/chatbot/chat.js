@@ -12,6 +12,7 @@ import {
   Button
 } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'; // Icono para el botón del chat
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,11 +38,19 @@ const ChatComponent = () => {
   const [assistantId, setAssistantId] = useState(localStorage.getItem("assistantid"));
   const navigate = useNavigate();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const [isOpen, setIsOpen] = useState(false);
+
+
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
   };
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    if (isOpen && messagesEndRef.current) {
+      // Scroll to bottom when chat opens or messages change
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isOpen, messages]);
 
   const getResponse = async (message) => {
     try {
@@ -114,53 +123,75 @@ const ChatComponent = () => {
   return (
     <ThemeProvider theme={theme}>
       <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ height: '80vh', display: 'flex', flexDirection: 'column', mt: 2 }}>
-        <Box sx={{ p: 2, backgroundColor: 'background.default', borderBottom: '2px solid rgba(0, 0, 0, 0.12)', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
-    <Typography variant="h6" sx={{ ml: 5 }}>{assistantInfo.assistantInfo.name}</Typography>
-</Box>
-          <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-            <List>
-              {messages.map((message, index) => (
-                <ListItem 
-                  key={index}
-                  sx={{ 
-                    justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                  }}
-                >
-                  <Paper 
-                    elevation={1}
-                    sx={{
-                      p: 1,
-                      backgroundColor: message.sender === 'user' ? 'primary.main' : 'grey.300',
-                      color: message.sender === 'user' ? 'white' : 'black',
+        {isOpen && (
+          <Paper elevation={3} sx={{ height: '80vh', display: 'flex', flexDirection: 'column', mt: 2 }}>
+            <Box sx={{ p: 2, backgroundColor: 'background.default', borderBottom: '2px solid rgba(0, 0, 0, 0.12)', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)' }}>
+              <Typography variant="h6" sx={{ ml: 5 }}>{assistantInfo.assistantInfo.name}</Typography>
+            </Box>
+            <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+              <List>
+                {messages.map((message, index) => (
+                  <ListItem 
+                    key={index}
+                    sx={{ 
+                      justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
                     }}
                   >
-                    <Typography variant="body1">{message.text}</Typography>
-                  </Paper>
-                </ListItem>
-              ))}
-            </List>
-            <div ref={messagesEndRef} />
-          </Box>
-          <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
-            <TextField
-              fullWidth
-              size="small"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-              placeholder="Type a message..."
-              variant="outlined"
-              InputProps={{
-                endAdornment: (
-                  <IconButton color="primary" onClick={sendMessage}>
-                    <SendIcon />
-                  </IconButton>
-                ),
-              }}
-            />
-          </Box>
-        </Paper>
+                    <Paper 
+                      elevation={1}
+                      sx={{
+                        p: 1,
+                        backgroundColor: message.sender === 'user' ? 'primary.main' : 'grey.300',
+                        color: message.sender === 'user' ? 'white' : 'black',
+                      }}
+                    >
+                      <Typography variant="body1">{message.text}</Typography>
+                    </Paper>
+                  </ListItem>
+                ))}
+              </List>
+              <div ref={messagesEndRef} />
+            </Box>
+            <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
+              <TextField
+                fullWidth
+                size="small"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Type a message..."
+                variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <IconButton color="primary" onClick={sendMessage}>
+                      <SendIcon />
+                    </IconButton>
+                  ),
+                }}
+              />
+            </Box>
+          </Paper>
+        )}
+
+        <IconButton
+          onClick={toggleChat}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            backgroundColor: 'primary.main',
+            color: 'white',
+            boxShadow: 2,
+            '&:hover': {
+              backgroundColor: 'primary.dark',
+            },
+          }}
+        >
+          <ChatBubbleOutlineIcon />
+        </IconButton>
       </Container>
     </ThemeProvider>
   );
