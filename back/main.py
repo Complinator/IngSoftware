@@ -1,20 +1,17 @@
-from fastapi import FastAPI, HTTPException, Security, Depends
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import AuthJWTException
 from database import save_user, user_exists, get_all_users, get_user_by_email
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
-import os
 from models.chatai import chatAI
 from models.pdf import readPDF
 from models.model import Request, User
 from helpers.utils import getCurrdir, getRelative
 from dotenv import load_dotenv, find_dotenv, set_key
-from fastapi import UploadFile, File
-from fastapi.responses import JSONResponse
-# from auth.auth import Auth
+from datetime import timedelta
+import os
 
 __location__ = getCurrdir() # Current directory (.../back)
 
@@ -23,10 +20,6 @@ load_dotenv(dotenv_path=getRelative(f".env.{env}"))
 api_key = os.getenv("API_KEY")
 assistant_id = os.getenv("ASSISTANT_ID")
 dotenvpath = find_dotenv(".env.local")
-
-# Auth
-security = HTTPBearer()
-# auth_handler = Auth()
 
 # App object
 app = FastAPI()
@@ -42,9 +35,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-chatai = chatAI(api_key)
 # Creating/Loading ai
+chatai = chatAI(api_key)
+readpdf = readPDF(getRelative("documents/LuquilloWMS.pdf"))
 
 if assistant_id == None:
     chatai.generatePrompt(readpdf.items)
@@ -60,6 +53,9 @@ class Settings(BaseModel):
     # Despues poner esto en .env.local y llamarlo con:
     # authjwt_secret_key = os.getenv("SECRET_KEY")
     authjwt_secret_key: str = "venjamin123"
+    authjwt_access_token_expires: timedelta = timedelta(minutes=5)  # Access token expiry
+    authjwt_refresh_token_expires: timedelta = timedelta(days=7)  # Refresh token expiry
+
 
 @AuthJWT.load_config
 def get_config():
@@ -69,47 +65,43 @@ def get_config():
 def readRoot():
     return {"HI!!!! o/"}
 
-@app.post('/secret')
-def secret_data(credentials: HTTPAuthorizationCredentials = Security(security)):
-    token = credentials.credentials
-    if(auth_handler.decode_token(token)):
-        return 'Top Secret data only authorized users can access this info'
-
-@app.post("/api/refresh")
-async def refresh_token(Authorize: AuthJWT = Depends()):
+@app.post('/auth/refresh')
+def refresh_token(Authorize: AuthJWT = Depends()):
     try:
-        Authorize.jwt_refresh_token_required()  # Ensure refresh token is present and valid
-    except AuthJWTException as e:
+        Authorize.jwt_refresh_token_required()
+        current_user = Authorize.get_jwt_subject()
+        new_access_token = Authorize.create_access_token(subject=current_user)
+        return {"access_token": new_access_token}
+    except Exception as e:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-
-    current_user = Authorize.get_jwt_subject()  # Get the current user
-    new_access_token = Authorize.create_access_token(subject=current_user)
-
-    return {"access_token": new_access_token}
-
-@app.post("/api/signup")
+    
+@app.post("/auth/signup")
 async def signup(user: User):
-    # Check if the user already exists
     if user_exists(user.email):
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # Hash the user's password
     hashed_password = hash_password(user.password)
-
-    # Save the user to the database
     save_user(user.email, hashed_password)
-
     return {"message": "User created successfully"}
 
-@app.post("/api/login")
+@app.post("/auth/login")
 async def login(user: User, Authorize: AuthJWT = Depends()):
     db_user = get_user_by_email(user.email)
     if not db_user or not check_password(user.password, db_user["password"]):
         raise HTTPException(status_code=400, detail="Invalid email or password")
-
     access_token = Authorize.create_access_token(subject=db_user["email"])
-    return {'access_token': access_token }
+    refresh_token = Authorize.create_refresh_token(subject=db_user["email"]) 
+    return {'access_token': access_token, 'refresh_token': refresh_token}
 
+@app.post("/auth/verify-token")
+def verify_token(Authorize: AuthJWT = Depends()):
+    try:
+        Authorize.jwt_required() 
+        user_identity = Authorize.get_jwt_subject()  # Get subject (identity) from token
+        return {"isValid": True, "user": user_identity}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
 # Route to get all users
 @app.get("/api/users")
 async def get_users(Authorize: AuthJWT = Depends()):

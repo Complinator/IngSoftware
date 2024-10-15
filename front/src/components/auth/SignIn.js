@@ -111,32 +111,11 @@ export default function SignIn(props) {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-          login(result);
-          localStorage.setItem('access_token', result.access_token);
-          localStorage.setItem('refresh_token', result.refresh_token);
-          navigate('/sidebar');
-          initializeChat();
-          // Login successful
-          //console.log("Login successful", result);
-          // You can redirect the user to a dashboard or set the user's logged-in state here
-      } else {
-          // Handle login error
-          console.error("Login failed:", result.detail);
-          alert(result.detail); // Display error message
-      }
+      login(payload); // Store both tokens
+      navigate('/sidebar');
     } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred during login.");
+      console.error("Error:", error);
+      alert("An error occurred during login.");
     }
   };
 

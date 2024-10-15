@@ -1,32 +1,30 @@
 import './App.css';
 import SignIn from './components/auth/SignIn';
-import React, { useEffect, useState } from 'react';
-import Chat from './components/chatbot/chat';
+import React, { useEffect } from 'react';
 import PDFDragDrop from './components/selectPDF/selectPDF2';
-import ChatbotDataSelection from './components/ChatbotDataSelection';
-import { Router, Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
-
-import { useAuth } from './context/AuthContext';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import ChatLayoutComponent from './components/sidebar';
 import ChatComponent from './components/chatbot/chat';
 import AssistantList from './components/selectBOT';
 import { AssistantProvider } from './context/AssistantContext';
-function App() {
-  const { isAuthenticated, user } = useAuth(); // Fetch authentication state
-  const isAuthChecking = user === null; // Loading state until user is set
+import { useAuth } from './context/AuthContext';
 
-  // Show a loading screen while checking authentication status
-  if (isAuthChecking) {
-    return <div>Loading...</div>;
+function App() {
+  const { isAuthenticated, loading } = useAuth();
+  
+  useEffect(() => {
+    console.log(isAuthenticated)
+  }, [isAuthenticated]);
+
+  if (loading) {
+    return <h1>Loading...</h1>;
   }
 
   return (
     <AssistantProvider>
       <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/login" element={<SignIn />} />
-
-        {/* Authenticated Routes */}
+        <Route path="/" element={isAuthenticated ? <Navigate to="/sidebar" /> : <SignIn />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/sidebar" /> : <SignIn />} />
         <Route
           path="/sidebar"
           element={isAuthenticated ? <ChatLayoutComponent /> : <Navigate to="/login" />}
