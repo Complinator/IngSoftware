@@ -7,36 +7,45 @@ import ChatbotDataSelection from './components/ChatbotDataSelection';
 import { Router, Route, Routes, Navigate, useNavigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import ChatLayoutComponent from './components/sidebar';
 import ChatComponent from './components/chatbot/chat';
 import AssistantList from './components/selectBOT';
 import { AssistantProvider } from './context/AssistantContext';
 function App() {
-  const { isAuthenticated, user } = useAuth(); // Fetch authentication state
-  const isAuthChecking = user === null; // Loading state until user is set
-
+  const { isAuthenticated} = useAuth(); // Fetch authentication state
+  
+  console.log(isAuthenticated);
   // Show a loading screen while checking authentication status
-  if (isAuthChecking) {
-    return <div>Loading...</div>;
-  }
+  
+  
 
   return (
+    <AuthProvider>
     <AssistantProvider>
-      <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/login" element={<SignIn />} />
-
-        {/* Authenticated Routes */}
-        <Route
-          path="/sidebar"
-          element={isAuthenticated ? <ChatLayoutComponent /> : <Navigate to="/login" />}
-        >
-          <Route path="chat" element={isAuthenticated ? <ChatComponent /> : <Navigate to="/login" />} />
-          <Route path="select-pdf" element={isAuthenticated ? <PDFDragDrop /> : <Navigate to="/login" />} />
-          <Route path="bot-selection" element={isAuthenticated ? <AssistantList /> : <Navigate to="/login" />} />
-        </Route>
-      </Routes>
+            {isAuthenticated ? (
+              <>
+              <Routes>
+                <Route path="/sidebar" element={<ChatLayoutComponent />}>
+                  <Route path="chat" element={<ChatComponent />} />
+                  <Route path="select-pdf" element={<PDFDragDrop />} />
+                  <Route path="bot-selection" element={<AssistantList />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/sidebar/chat" />} />
+              </Routes>
+              </>
+            ) : (
+              <>
+              <Routes>
+                <Route path="/" element={<SignIn />} />
+                <Route path="/login" element={<SignIn />} />
+                <Route path="*" element={<Navigate to="/login" />} />
+              </Routes>
+              </>
+            )}
+        
     </AssistantProvider>
+    </AuthProvider>
   );
 }
 

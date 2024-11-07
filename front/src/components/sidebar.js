@@ -9,7 +9,8 @@ import {
   ListItem, 
   ListItemIcon, 
   ListItemText,
-  IconButton
+  IconButton,
+  Button
 } from '@mui/material';
 import { 
   Chat as ChatIcon, 
@@ -41,8 +42,8 @@ const ChatLayoutComponent = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
-  //console.log(isAuthenticated);
+  const { isAuthenticated, logout } = useAuth();
+  
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -53,6 +54,12 @@ const ChatLayoutComponent = () => {
     { text: 'PDF Settings', icon: <SettingsIcon />, path: 'select-pdf' },
     { text: 'Bot Select', icon: <SmartToyIcon />, path: 'bot-selection' },
   ];
+
+  const handleLogout = () => {
+    localStorage.clear();
+    logout();
+    navigate('/login');
+  }
 
   const drawer = (
     <div>
@@ -93,6 +100,9 @@ const ChatLayoutComponent = () => {
             <Typography variant="h6" noWrap component="div">
               Chat Application
             </Typography>
+            <Button color="inherit" onClick={handleLogout}>
+              Logout
+            </Button>
           </Toolbar>
         </AppBar>
         <Box

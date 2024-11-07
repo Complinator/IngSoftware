@@ -82,7 +82,7 @@ export default function SignIn(props) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
-  const { login } = useAuth(); // Use login from AuthContext
+  const { login, isAuthenticated } = useAuth(); // Use login from AuthContext
   const navigate = useNavigate(); // To redirect the user
 
 
@@ -93,7 +93,9 @@ export default function SignIn(props) {
   const handleClose = () => {
     setOpen(false);
   };
+  
 
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -121,13 +123,14 @@ export default function SignIn(props) {
 
       const result = await response.json();
       if (response.ok) {
-          login(result);
+          await login(result);
           localStorage.setItem('access_token', result.access_token);
           localStorage.setItem('refresh_token', result.refresh_token);
           navigate('/sidebar');
+          console.log("Navigating to sidebar");
           initializeChat();
           // Login successful
-          //console.log("Login successful", result);
+          console.log("Login successful", result);
           // You can redirect the user to a dashboard or set the user's logged-in state here
       } else {
           // Handle login error

@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+
+export const useAuth = () => useContext(AuthContext);
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -9,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   // Log in function (save token)
   const login = (token) => {
     setUser(token);
+    setIsAuthenticated(true);
     localStorage.setItem('access_token', token); // Store token in localStorage
   };
 
@@ -16,25 +20,24 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('access_token'); // Remove token from localStorage
+    setIsAuthenticated(false);
   };
 
   // On mount, check if token exists in localStorage
-  useEffect(() => {
+  /*useEffect(() => {
     const token = localStorage.getItem('access_token');
     console.log("Checking for token in localStorage:", token);
     if (token) {
       setUser(token); // If token is found, set user state to the token
     }
     setIsAuthenticated(!!token);
-    console.log("isAuthenticated:", !!token);
-  }, []);
-
+    //console.log("isAuthenticated:", !!token);
+  }, [isAuthenticated]);*/
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, setIsAuthenticated, isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);

@@ -46,10 +46,10 @@ app.add_middleware(
 chatai = chatAI(api_key)
 # Creating/Loading ai
 
-if assistant_id == None:
-    chatai.generatePrompt(readpdf.items)
-    set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
-    print("Creating...")
+#if assistant_id == None:
+ #   chatai.generatePrompt(readpdf.items)
+  #  set_key(dotenvpath, "ASSISTANT_ID", chatai.createAssistant(readpdf.items["Nombre"]))
+   # print("Creating...")
 
 documents_folder = getRelative("documents")
 if not os.path.exists(documents_folder):
