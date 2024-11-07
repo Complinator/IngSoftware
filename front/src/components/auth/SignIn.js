@@ -57,24 +57,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const initializeChat = async () => {
-  if (!sessionStorage.getItem("thread_id")) {
-  try {
-      const response = await fetch("http://localhost:8000/chat", {
-          method: "GET",
-          headers: {
-              "Content-Type": "application/json",
-          },
-      });
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      sessionStorage.setItem("thread_id", data.threadid)
-  } catch (error) {
-      console.error("Error initializing chat:", error);
-  }} 
-};
+
 
 export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);

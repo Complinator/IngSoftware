@@ -45,6 +45,8 @@ const AssistantList = () => {
     }
   };
 
+  
+
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`http://localhost:8000/api/delete-assistant`, {
@@ -117,6 +119,22 @@ const AssistantList = () => {
       // You might want to update the UI to reflect the chosen assistant
       //console.log(assistantInfo.assistantInfo);
       //alert(`Assistant ${data.name} chosen successfully`);
+      try {
+        const response = await fetch("http://localhost:8000/chat", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log("threadid: ", data.threadid);
+        sessionStorage.setItem("thread_id", data.threadid)
+        } catch (error) {
+        console.error("Error initializing chat:", error);
+        }
     } catch (err) {
       setError(err.message);
     }

@@ -34,3 +34,56 @@ def get_all_users():
 def get_user_by_email(email: str):
     user = users_collection.find_one({"email": email})
     return user
+def save_conversation(thread_id: str, messages: list):
+    print(f"Checking for existing thread with ID: {thread_id}")
+    thread = db["conversaciones"].find_one({"thread_id": thread_id})
+    
+    if thread is None:
+        print(f"No existing thread found. Creating new conversation document for thread ID: {thread_id}")
+        conversation_document = {
+            "thread_id": thread_id,
+            "messages": messages,
+        }
+        db["conversaciones"].insert_one(conversation_document)
+        print(f"New conversation document inserted for thread ID: {thread_id}")
+    else:
+        print(f"Existing thread found for thread ID: {thread_id}. Checking for new messages.")
+        existing_message_ids = {msg["id"] for msg in thread["messages"]}
+        new_messages = [msg for msg in messages if msg["id"] not in existing_message_ids]
+        
+        if new_messages:
+            print(f"New messages found. Updating conversation document for thread ID: {thread_id}")
+            db["conversaciones"].update_one(
+                {"thread_id": thread_id},
+                {"$push": {"messages": {"$each": new_messages}}}
+            )
+            print(f"Conversation document updated for thread ID: {thread_id}")
+        else:
+            print(f"No new messages to add for thread ID: {thread_id}")
+
+    print(f"Checking for existing thread with ID: {thread_id}")
+    thread = db["conversaciones"].find_one({"thread_id": thread_id})
+    
+    if thread is None:
+        print(f"No existing thread found. Creating new conversation document for thread ID: {thread_id}")
+        conversation_document = {
+            "thread_id": thread_id,
+            "messages": messages,
+        }
+        db["conversaciones"].insert_one(conversation_document)
+        
+        print(f"New conversation document inserted for thread ID: {thread_id}")
+    else:
+        print(f"Existing thread found for thread ID: {thread_id}. Checking for new messages.")
+        existing_message_ids = {msg["id"] for msg in thread["messages"]}
+        new_messages = [msg for msg in messages if msg["id"] not in existing_message_ids]
+        
+        if new_messages:
+            print(f"New messages found. Updating conversation document for thread ID: {thread_id}")
+            db["conversaciones"].update_one(
+                {"thread_id": thread_id},
+                {"$push": {"messages": {"$each": new_messages}}}
+            )
+            print(f"Conversation document updated for thread ID: {thread_id}")
+        else:
+            print(f"No new messages to add for thread ID: {thread_id}")

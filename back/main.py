@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth import AuthJWT
-from database import save_user, user_exists, get_all_users, get_user_by_email
+from database import save_user, user_exists, get_all_users, get_user_by_email, save_conversation
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
 from models.chatai import chatAI
@@ -143,6 +143,8 @@ async def getResponse(request: Request): #Authorize: AuthJWT = Depends()
     message_id = chatai.createMessage(request.message, request.threadid)
     run_id = chatai.runAssistant(request.threadid, request.assistantid)
     response = chatai.retrieveAssistant(run_id, request.threadid)
+    conversation = chatai.retrieveMessages(request.threadid)
+    save_conversation(thread_id=request.threadid, messages=conversation)
 
     return {"response": response}
 
@@ -204,3 +206,4 @@ async def load_assistant(request: LoadAssistantRequest):
 @app.get("/api/current-assistant")
 async def current_assistant():
     return {"assistant_id": chatai.assistant.id}
+

@@ -38,7 +38,7 @@ const ChatComponent = () => {
   const [assistantId, setAssistantId] = useState(localStorage.getItem("assistantid"));
   const navigate = useNavigate();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
 
   const toggleChat = () => {
@@ -50,10 +50,34 @@ const ChatComponent = () => {
       // Scroll to bottom when chat opens or messages change
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+    initializeChat();
   }, [isOpen, messages]);
+
+  const initializeChat = async () => {
+    if (!sessionStorage.getItem("thread_id")) {
+    try {
+        const response = await fetch("http://localhost:8000/chat", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log("threadid: ", data.threadid);
+        sessionStorage.setItem("thread_id", data.threadid)
+    } catch (error) {
+        console.error("Error initializing chat:", error);
+    }} 
+  };
 
   const getResponse = async (message) => {
     try {
+        console.log("threadid: ", threadid);
+        console.log("assistantid: ", assistantInfo.assistantInfo.id);
+        console.log("message: ", message);
         const response = await fetch("http://localhost:8000/chat", {
             method: "POST",
             headers: {

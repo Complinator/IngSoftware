@@ -138,3 +138,31 @@ class chatAI:
             elif run.status == "failed":
                 return "An error occurred while processing your request."
             time.sleep(1)
+    
+    def retrieveMessages(self, tid : str):
+        messages = self.client.beta.threads.messages.list(thread_id=tid)
+        # Sort messages by 'created_at' to maintain chronological order
+        sorted_messages = sorted(messages, key=lambda msg: msg.created_at)
+
+        # Collect message-response pairs with IDs
+        message_response_pairs = []
+        current_message = None
+        current_message_id = None
+
+        for message in sorted_messages:
+            if message.role == 'user':
+                current_message = message.content[0].text.value  # Store user message text
+                current_message_id = message.id  # Store user message ID
+            elif message.role == 'assistant' and current_message:
+                # Pair with assistant response if there's a current user message
+                assistant_response = message.content[0].text.value
+                message_response_pairs.append({
+                    "id": current_message_id, 
+                    "message": current_message, 
+                    "response": assistant_response
+                })
+                current_message = None  # Reset for the next pair
+                current_message_id = None  # Reset ID for the next pair
+
+        return message_response_pairs
+    
