@@ -26,7 +26,7 @@ dotenvpath = find_dotenv(".env.local")
 app = FastAPI()
 
 # Allowed origins for CORS
-origins = ["http://localhost:3000", "https://localhost:3000", "http://localhost:8000", "https://localhost:8000"]
+origins = ["http://localhost:3000", "https://localhost:3000", "http://localhost:8000", "https://localhost:8000", "http://192.168.70.204:3000"]
 
 app.add_middleware(
     CORSMiddleware,
