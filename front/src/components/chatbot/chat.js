@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Box, 
   TextField, 
@@ -8,7 +8,6 @@ import {
   Container,
   List,
   ListItem,
-  ListItemText,
   Button,
   CircularProgress
 } from '@mui/material';
@@ -36,14 +35,7 @@ const ChatComponent = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const [threadid, setThreadid] = useState(sessionStorage.getItem("thread_id"));
-  const [assistantId, setAssistantId] = useState(localStorage.getItem("assistantid"));
   const navigate = useNavigate();
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages, isTyping]);
 
   const getResponse = async (message) => {
     try {
@@ -73,7 +65,6 @@ const ChatComponent = () => {
       setIsTyping(true);
 
       setThreadid(sessionStorage.getItem("thread_id"));
-      setAssistantId(localStorage.getItem("assistantid"));
       
       const backendResponse = await getResponse(newMessage.text);
       

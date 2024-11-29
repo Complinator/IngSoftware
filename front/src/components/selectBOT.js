@@ -17,6 +17,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { useAssistant } from '../context/AssistantContext';
+import { useAuth } from '../context/AuthContext';
+
 const AssistantList = () => {
   const [assistants, setAssistants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,13 +28,21 @@ const AssistantList = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [toBeDeleted, setToBeDeleted] = useState({});
+  const { userEmail } = useAuth();
+
   useEffect(() => {
     fetchAssistants();
   }, []);
 
   const fetchAssistants = async () => {
     try {
-      const response = await fetch('http://localhost:8000/assistants');
+      const response = await fetch('http://localhost:8000/assistants', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email: userEmail})
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch assistants');
       }
@@ -45,10 +55,15 @@ const AssistantList = () => {
     }
   };
 
+  
+
   const handleDelete = async (id) => {
     try {
       const response = await fetch(`http://localhost:8000/api/delete-assistant`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({assistantid: id})
       });
       if (!response.ok) {
@@ -74,30 +89,6 @@ const AssistantList = () => {
     setName('');
     setToBeDeleted({});
   };
-  const handleSubmit = async () => {
-    if (name.trim() === '') {
-      alert('Name field cannot be empty');
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:8000/api/create-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to create assistant');
-      }
-      const newAssistant = await response.json();
-      setAssistants([...assistants, newAssistant]);
-      handleClose();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
 
   const handleChoose = async (id) => {
     try {
@@ -117,6 +108,22 @@ const AssistantList = () => {
       // You might want to update the UI to reflect the chosen assistant
       //console.log(assistantInfo.assistantInfo);
       //alert(`Assistant ${data.name} chosen successfully`);
+      try {
+        const response = await fetch("http://localhost:8000/chat", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log("threadid: ", data.threadid);
+        sessionStorage.setItem("thread_id", data.threadid)
+        } catch (error) {
+        console.error("Error initializing chat:", error);
+        }
     } catch (err) {
       setError(err.message);
     }

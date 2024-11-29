@@ -57,24 +57,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const initializeChat = async () => {
-  if (!sessionStorage.getItem("thread_id")) {
-  try {
-      const response = await fetch("http://localhost:8000/chat", {
-          method: "GET",
-          headers: {
-              "Content-Type": "application/json",
-          },
-      });
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
-      const data = await response.json();
-      sessionStorage.setItem("thread_id", data.threadid)
-  } catch (error) {
-      console.error("Error initializing chat:", error);
-  }} 
-};
+
 
 export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);
@@ -111,30 +94,11 @@ export default function SignIn(props) {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-          login(result);
-          navigate('/sidebar');
-          initializeChat();
-          // Login successful
-          //console.log("Login successful", result);
-          // You can redirect the user to a dashboard or set the user's logged-in state here
-      } else {
-          // Handle login error
-          console.error("Login failed:", result.detail);
-          alert(result.detail); // Display error message
-      }
+      login(payload); // Store both tokens
+      navigate('/sidebar');
     } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred during login.");
+      console.error("Error:", error);
+      alert("An error occurred during login.");
     }
   };
 

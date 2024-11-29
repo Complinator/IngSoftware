@@ -18,11 +18,13 @@ import {
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { useAssistant } from '../../context/AssistantContext';
+import { useAuth } from '../../context/AuthContext';
 
 
 const PDFDragDrop = () => {
   const [files, setFiles] = useState([]);
   const assistantInfo = useAssistant();
+  const { userEmail } = useAuth();
   const onDrop = useCallback((acceptedFiles) => {
     const pdfFiles = acceptedFiles.filter(
       file => file.type === 'application/pdf'
@@ -50,19 +52,21 @@ const PDFDragDrop = () => {
 
     filesToUpload.forEach(fileObj => {
       formData.append('file', fileObj.file);
-      fileObj.isUploading = true;
     });
+
+    // Add email as a separate form field
+    formData.append('email', userEmail);
 
     setFiles([...files]);
 
     try {
       const response = await fetch('http://localhost:8000/upload', {
         method: 'POST',
-        body: formData,
+        body: formData, // Send formData directly
       });
 
       const result = await response.json();
-      
+
       setFiles(files.map(fileObj => {
         if (filesToUpload.some(f => f.file === fileObj.file)) {
           return { ...fileObj, isUploading: false, isUploaded: true };
@@ -77,6 +81,7 @@ const PDFDragDrop = () => {
       setFiles(files.map(fileObj => ({ ...fileObj, isUploading: false })));
     }
   };
+
 
   return (
     <Box sx={{ width: '100%', maxWidth: 500, margin: 'auto' }}>

@@ -22,6 +22,8 @@ import ChatComponent from './chatbot/chat'; // Import your existing ChatComponen
 import { Router, Route, Routes, Navigate, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import SelectPDF from './selectPDF/SelectPDF';
 import ChatbotDataSelection from './ChatbotDataSelection';
+import LogoutIcon from '@mui/icons-material/Logout';
+import FolderIcon from '@mui/icons-material/Folder';
 import { useAuth } from '../context/AuthContext';
 
 const drawerWidth = 240;
@@ -41,7 +43,7 @@ const ChatLayoutComponent = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   //console.log(isAuthenticated);
 
   const handleDrawerToggle = () => {
@@ -52,6 +54,7 @@ const ChatLayoutComponent = () => {
     { text: 'Chat', icon: <ChatIcon />, path: 'chat' },
     { text: 'PDF Settings', icon: <SettingsIcon />, path: 'select-pdf' },
     { text: 'Bot Select', icon: <SmartToyIcon />, path: 'bot-selection' },
+    { text: 'File Manager', icon: <FolderIcon />, path: 'file-manage' },
   ];
 
   const drawer = (
@@ -80,19 +83,28 @@ const ChatLayoutComponent = () => {
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-          <Toolbar>
+          <Toolbar sx={{justifyContent: "space-between"}}>
+            <Box sx={{ display: 'flex', verticalAlign: "middle" }}>
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: 'none' } }}
+              sx={{ mr: 2 }}
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div">
+            <Typography variant="h6" noWrap component="div" sx={{height: "fit-content", margin: "auto"}}>
               Chat Application
             </Typography>
+            </Box>
+            <IconButton
+              color="inherit"
+              sx={{ ml: 2 }}
+              onClick={logout}
+            >
+              <LogoutIcon />
+            </IconButton>
           </Toolbar>
         </AppBar>
         <Box
