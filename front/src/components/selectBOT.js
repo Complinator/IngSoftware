@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { useAssistant } from '../context/AssistantContext';
 import { useAuth } from '../context/AuthContext';
+import DriveFileMoveIcon from '@mui/icons-material/DriveFileMove';
 
 const AssistantList = () => {
   const [assistants, setAssistants] = useState([]);
@@ -89,6 +90,10 @@ const AssistantList = () => {
     setName('');
     setToBeDeleted({});
   };
+
+  const handleFiles = (id) => {
+    navigate(`/sidebar/bot/${id}`)
+  }
 
   const handleChoose = async (id) => {
     try {
@@ -162,6 +167,13 @@ const AssistantList = () => {
             key={assistant.id}
             secondaryAction={
               <Box>
+                <IconButton
+                  edge="end"
+                  aria-label="select"
+                  onClick={() => handleFiles(assistant.id)}
+                >
+                  <DriveFileMoveIcon />
+                </IconButton>
                 <IconButton edge="end" aria-label="delete" onClick={() => handleOpen(assistant.id, assistant.name)} >{/*onClick={() => handleDelete(assistant.id)}*/}
                   <DeleteIcon />
                 </IconButton>

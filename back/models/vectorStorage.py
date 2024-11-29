@@ -25,6 +25,15 @@ class vectorStorage:
         return ""
     
     def deleteStorage(self, id : str):
+        storageFiles = self.client.beta.vector_stores.files.list(
+            vector_store_id=id
+        )
+
+        for x in storageFiles.data:
+            self.client.files.delete(
+                file_id=x.id
+            )
+
         self.client.beta.vector_stores.delete(
             vector_store_id=id
         )
@@ -48,7 +57,14 @@ class vectorStorage:
         storageFiles = self.client.beta.vector_stores.files.list(
             vector_store_id=storage
         )
-        return storageFiles.id
+        files = []
+        for x in storageFiles.data:
+            file = self.client.files.retrieve(
+                file_id=x.id
+            )
+            files.append({"name": file.filename, "id": file.id})
+
+        return files
     
     def deleteFile(self, storage, file):
         self.client.beta.vector_stores.files.delete(
@@ -57,9 +73,9 @@ class vectorStorage:
         )
 
         self.client.files.delete(
-            file
+            file_id=file
         )
 
     def fileContent(self, file):
-        content = self.client.files.content(file)
+        content = self.client.files.content(file_id=file)
         return content

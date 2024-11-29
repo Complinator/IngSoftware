@@ -89,6 +89,18 @@ class chatAI:
     def modifyAssistant(self):
         pass
 
+    def parseStorage2Assistant(self, assistant, storage):
+        result = self.client.beta.assistants.update(
+            assistant_id=assistant,
+            tools=[{"type": "file_search"}],
+            tool_resources={
+                "file_search": {
+                "vector_store_ids": [storage]
+                }
+            }
+        )
+        return result
+
     def listAssistant(self):
         assistants = []
         for assistant in self.client.beta.assistants.list().data:

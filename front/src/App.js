@@ -8,6 +8,9 @@ import ChatComponent from './components/chatbot/chat';
 import AssistantList from './components/selectBOT';
 import { AssistantProvider } from './context/AssistantContext';
 import { useAuth } from './context/AuthContext';
+import AssistantDetails from './assistant/assistantInfo';
+import FileUploadPage from './assistant/addFiles';
+import TextFileViewer from './assistant/fileVisualization';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -32,6 +35,9 @@ function App() {
           <Route path="chat" element={isAuthenticated ? <ChatComponent /> : <Navigate to="/login" />} />
           <Route path="select-pdf" element={isAuthenticated ? <PDFDragDrop /> : <Navigate to="/login" />} />
           <Route path="bot-selection" element={isAuthenticated ? <AssistantList /> : <Navigate to="/login" />} />
+          <Route path="bot/:assistant" element={isAuthenticated ? <AssistantDetails /> : <Navigate to="/login" />} />
+          <Route path="/sidebar/bot/:storage/upload" element={isAuthenticated ? <FileUploadPage /> : <Navigate to="/login" />} />
+          <Route path="/sidebar/bot/:file/view" element={isAuthenticated ? <TextFileViewer /> : <Navigate to="/login" />} />
         </Route>
       </Routes>
     </AssistantProvider>

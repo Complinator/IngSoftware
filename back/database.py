@@ -111,3 +111,7 @@ def remove_assistant(assistant_id):
 def list_assistants(email : str):
     result = db["asistentes"].find({"owner": email}, {"_id": 0})
     return list(result)
+
+def get_assistants(assistant_id):
+    result = db["asistentes"].find_one({"id": assistant_id}, {"_id": 0})
+    return result

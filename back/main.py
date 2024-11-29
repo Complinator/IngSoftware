@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth import AuthJWT
-from database import save_user, user_exists, get_all_users, get_user_by_email, save_conversation, save_assistant, remove_assistant, list_assistants
+from database import save_user, user_exists, get_all_users, get_user_by_email, save_conversation, save_assistant, remove_assistant, list_assistants, get_assistants
 from pydantic import BaseModel
 from encrypt import hash_password, check_password
 from models.chatai import chatAI
@@ -158,11 +158,10 @@ async def upload_pdf(file: UploadFile = File(...), email: str = Form(...)):
 
     # Process the file and email
     readpdf = readPDF(file_location)
-    print(email)
-    print(file)
     assistant_id = chatai.createAssistant(file.filename.replace(".pdf", ""), chatai.generatePrompt(readpdf.items))
     vectorStorage_id = storage.createStorage(file.filename.replace(".pdf", ""))
     save_assistant(email, assistant_id, str(file.filename.replace(".pdf", "")), vectorStorage_id)
+    assistant = chatai.parseStorage2Assistant(assistant_id, vectorStorage_id)
     return {"info": f"Assistant created successfully'"}
 
 class SubmitFilesRequest(BaseModel):
@@ -219,19 +218,56 @@ async def load_assistant(request: LoadAssistantRequest):
     chatai.loadAssistant(request.assistant_id)
     return {"assistant_id": chatai.assistant.id, "assistant_name": chatai.assistant.name}
 
+@app.post("/api/get-assistant")
+async def load_assistant(request: LoadAssistantRequest):
+    result = get_assistants(request.assistant_id)
+    return result
+
+class GetFilesRequest(BaseModel):
+    storage_id: str
+
+@app.post("/api/get-files")
+async def load_files(request : GetFilesRequest):
+    result = storage.listFiles(request.storage_id)
+    return result
+
 @app.get("/api/current-assistant")
 async def current_assistant():
     return {"assistant_id": chatai.assistant.id}
 
-@app.post("/api/submit-files-storage")
-async def submit_files(request: SubmitFilesRequest):
-    documents_path = getRelative("documents")
-    processed_files = []
-    for file_name in request.files:
-        file_path = os.path.join(documents_path, file_name)
-        if os.path.exists(file_path):
-            processed_content = readPDF(file_path).readPDF()
-            processed_files.append({"file": file_name, "content": processed_content})
-        else:
-            raise HTTPException(status_code=404, detail=f"File '{file_name}' not found")
-    return JSONResponse(content={"processed_files": processed_files})
+@app.post("/api/upload/botfile")
+async def upload_txt(file: UploadFile = File(...), storage_id: str = Form(...)):
+    file_location = f"documents/{file.filename}"
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+
+    # Process the file and email
+    storage.uploadFile(file.filename, storage_id)
+    return {"info": f"File created successfully'"}
+
+class DeleteFilesRequest(BaseModel):
+    storage_id: str
+    file_id: str
+    file_name:str
+
+@app.post("/api/delete/botfile")
+async def upload_txt(request: DeleteFilesRequest):
+    try:
+        os.remove(getRelative(f"documents/{request.file_name}"))
+        print(f"File documents/{request.file_name} deleted successfully.")
+    except OSError as e:
+        print(f"Error deleting the file: {e}")
+
+    # Process the file and email
+    storage.deleteFile(request.storage_id, request.file_id)
+    return {"info": f"File deleted successfully'"}
+
+class GetFileRequest(BaseModel):
+    file_id: str
+
+@app.post("/api/get/botfile")
+async def upload_txt(request: GetFileRequest):
+    print(request.file_id)
+    content = storage.fileContent(request.file_id)
+    print(content)
+    return {"info": f"File deleted successfully'"}

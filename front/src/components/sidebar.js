@@ -53,8 +53,7 @@ const ChatLayoutComponent = () => {
   const menuItems = [
     { text: 'Chat', icon: <ChatIcon />, path: 'chat' },
     { text: 'PDF Settings', icon: <SettingsIcon />, path: 'select-pdf' },
-    { text: 'Bot Select', icon: <SmartToyIcon />, path: 'bot-selection' },
-    { text: 'File Manager', icon: <FolderIcon />, path: 'file-manage' },
+    { text: 'Bot Select', icon: <SmartToyIcon />, path: 'bot-selection' }
   ];
 
   const drawer = (
